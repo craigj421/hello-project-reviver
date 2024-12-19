@@ -3,29 +3,41 @@ import { PropertyDetails } from "./types";
 
 interface PdfPreviewProps {
   details: PropertyDetails;
+  selectedSections: {
+    propertyInfo: boolean;
+    closingCosts: boolean;
+    mortgageInfo: boolean;
+    additionalFees: boolean;
+    additionalServices: boolean;
+    otherCosts: boolean;
+  };
 }
 
-export const PdfPreview = ({ details }: PdfPreviewProps) => {
+export const PdfPreview = ({ details, selectedSections }: PdfPreviewProps) => {
   const calculateTotalClosingCosts = () => {
-    return (
-      details.taxesApprox +
-      details.docStampsDeed +
-      details.ownersTitleInsurance +
-      details.commission +
-      details.complianceAudit +
-      details.serviceTech +
-      details.termiteInspection +
-      details.fhaVaFees +
-      details.survey +
-      details.hoa +
-      details.homeWarranty +
-      details.buyersClosingCost +
-      details.repairs +
-      details.searchExamClosingFee
-    );
+    let total = 0;
+    
+    if (selectedSections.closingCosts) {
+      total += details.taxesApprox + details.docStampsDeed + details.ownersTitleInsurance;
+    }
+    
+    if (selectedSections.additionalFees) {
+      total += details.complianceAudit + details.serviceTech + details.termiteInspection;
+    }
+    
+    if (selectedSections.additionalServices) {
+      total += details.fhaVaFees + details.survey + details.hoa;
+    }
+    
+    if (selectedSections.otherCosts) {
+      total += details.homeWarranty + details.buyersClosingCost + details.repairs;
+    }
+    
+    return total;
   };
 
   const calculateTotalMortgage = () => {
+    if (!selectedSections.mortgageInfo) return 0;
     return details.firstMortgage + details.secondMortgage;
   };
 
@@ -47,103 +59,123 @@ export const PdfPreview = ({ details }: PdfPreviewProps) => {
         </div>
 
         {/* Seller and Property Information */}
-        <div className="space-y-2">
-          <div className="flex">
-            <span className="w-32">Seller's Name:</span>
-            <span>{details.sellerName}</span>
+        {selectedSections.propertyInfo && (
+          <div className="space-y-2">
+            <div className="flex">
+              <span className="w-32">Seller's Name:</span>
+              <span>{details.sellerName}</span>
+            </div>
+            <div className="flex">
+              <span className="w-32">Property Address:</span>
+              <span>{details.propertyAddress}</span>
+            </div>
+            <div className="flex">
+              <span className="w-32">Purchase Price:</span>
+              <span>${details.purchasePrice.toLocaleString()}</span>
+            </div>
           </div>
-          <div className="flex">
-            <span className="w-32">Property Address:</span>
-            <span>{details.propertyAddress}</span>
-          </div>
-          <div className="flex">
-            <span className="w-32">Purchase Price:</span>
-            <span>${details.purchasePrice.toLocaleString()}</span>
-          </div>
-        </div>
+        )}
 
         {/* Estimated Closing Costs */}
-        <div className="space-y-2">
-          <h2 className="font-semibold">Estimated Closing Costs:</h2>
-          <div className="space-y-1 pl-4">
-            <div className="flex justify-between">
-              <span>Doc Stamps on Deed:</span>
-              <span>${details.docStampsDeed.toLocaleString()}</span>
+        {(selectedSections.closingCosts || 
+          selectedSections.additionalFees || 
+          selectedSections.additionalServices || 
+          selectedSections.otherCosts) && (
+          <div className="space-y-2">
+            <h2 className="font-semibold">Estimated Closing Costs:</h2>
+            <div className="space-y-1 pl-4">
+              {selectedSections.closingCosts && (
+                <>
+                  <div className="flex justify-between">
+                    <span>Doc Stamps on Deed:</span>
+                    <span>${details.docStampsDeed.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Owner's Title Insurance:</span>
+                    <span>${details.ownersTitleInsurance.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Taxes Approx:</span>
+                    <span>${details.taxesApprox.toLocaleString()}</span>
+                  </div>
+                </>
+              )}
+              
+              {selectedSections.additionalFees && (
+                <>
+                  <div className="flex justify-between">
+                    <span>Compliance & Audit:</span>
+                    <span>${details.complianceAudit.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Service & Tech:</span>
+                    <span>${details.serviceTech.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Termite Inspection:</span>
+                    <span>${details.termiteInspection.toLocaleString()}</span>
+                  </div>
+                </>
+              )}
+              
+              {selectedSections.additionalServices && (
+                <>
+                  <div className="flex justify-between">
+                    <span>FHA/VA Fees:</span>
+                    <span>${details.fhaVaFees.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Survey:</span>
+                    <span>${details.survey.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>HOA:</span>
+                    <span>${details.hoa.toLocaleString()}</span>
+                  </div>
+                </>
+              )}
+              
+              {selectedSections.otherCosts && (
+                <>
+                  <div className="flex justify-between">
+                    <span>Home Warranty:</span>
+                    <span>${details.homeWarranty.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Buyer's Closing Cost:</span>
+                    <span>${details.buyersClosingCost.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Repairs:</span>
+                    <span>${details.repairs.toLocaleString()}</span>
+                  </div>
+                </>
+              )}
             </div>
-            <div className="flex justify-between">
-              <span>Owner's Title Insurance:</span>
-              <span>${details.ownersTitleInsurance.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Commission:</span>
-              <span>${details.commission.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Compliance & Audit:</span>
-              <span>${details.complianceAudit.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Service & Tech:</span>
-              <span>${details.serviceTech.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Termite Inspection:</span>
-              <span>${details.termiteInspection.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>FHA/VA Fees:</span>
-              <span>${details.fhaVaFees.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Survey:</span>
-              <span>${details.survey.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Search/Exam/Closing Fee:</span>
-              <span>${details.searchExamClosingFee.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Taxes Approx:</span>
-              <span>${details.taxesApprox.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>HOA:</span>
-              <span>${details.hoa.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Home Warranty:</span>
-              <span>${details.homeWarranty.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Buyer's Closing Cost:</span>
-              <span>${details.buyersClosingCost.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Repairs:</span>
-              <span>${details.repairs.toLocaleString()}</span>
+            <div className="flex justify-between font-semibold pt-2 border-t">
+              <span>Total Closing Cost:</span>
+              <span>${calculateTotalClosingCosts().toLocaleString()}</span>
             </div>
           </div>
-          <div className="flex justify-between font-semibold pt-2 border-t">
-            <span>Total Closing Cost:</span>
-            <span>${calculateTotalClosingCosts().toLocaleString()}</span>
-          </div>
-        </div>
+        )}
 
         {/* Mortgage Information */}
-        <div className="space-y-2">
-          <div className="flex justify-between">
-            <span>First Mortgage:</span>
-            <span>${details.firstMortgage.toLocaleString()}</span>
+        {selectedSections.mortgageInfo && (
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <span>First Mortgage:</span>
+              <span>${details.firstMortgage.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Second Mortgage:</span>
+              <span>${details.secondMortgage.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between font-semibold pt-2 border-t">
+              <span>Outstanding Loan + Mortgage costs:</span>
+              <span>${calculateTotalMortgage().toLocaleString()}</span>
+            </div>
           </div>
-          <div className="flex justify-between">
-            <span>Second Mortgage:</span>
-            <span>${details.secondMortgage.toLocaleString()}</span>
-          </div>
-          <div className="flex justify-between font-semibold pt-2 border-t">
-            <span>Outstanding Loan + Mortgage costs:</span>
-            <span>${calculateTotalMortgage().toLocaleString()}</span>
-          </div>
-        </div>
+        )}
 
         {/* Net Proceeds */}
         <div className="flex justify-between font-bold text-lg pt-4 border-t">
