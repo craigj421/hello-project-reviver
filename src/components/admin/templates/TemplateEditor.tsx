@@ -1,72 +1,27 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Plus } from "lucide-react";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { Template, Section, Field, TemplateData } from "@/types/template";
+import { Template, Section, Field } from "@/types/template";
 import { TemplateHeader } from "./editor/TemplateHeader";
 import { TemplateSection } from "./editor/TemplateSection";
+import { useTemplateData } from "./hooks/useTemplateData";
+import {
+  addSection,
+  updateSection,
+  deleteSection,
+  addField,
+  updateField,
+  deleteField,
+  reorderSections
+} from "./utils/templateOperations";
 
 export const TemplateEditor = () => {
   const { id } = useParams();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  
   const [template, setTemplate] = useState<Template | null>(null);
-
-  const { data: templateData, isLoading } = useQuery({
-    queryKey: ['template', id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('document_templates')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (error) {
-        console.error('Error fetching template:', error);
-        throw error;
-      }
-
-      return data;
-    },
-  });
-
-  const updateTemplateMutation = useMutation({
-    mutationFn: async (updatedTemplate: Partial<Template>) => {
-      // Convert sections to JSON-compatible format before saving
-      const templateDataToSave: Partial<TemplateData> = {
-        ...updatedTemplate,
-        sections: JSON.parse(JSON.stringify(updatedTemplate.sections)),
-      };
-
-      const { error } = await supabase
-        .from('document_templates')
-        .update(templateDataToSave)
-        .eq('id', id);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['template', id] });
-      toast({
-        title: "Success",
-        description: "Template updated successfully",
-      });
-    },
-    onError: (error) => {
-      console.error('Error updating template:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update template",
-        variant: "destructive",
-      });
-    },
-  });
+  const { templateData, isLoading, updateTemplate } = useTemplateData(id!);
 
   useEffect(() => {
     if (templateData) {
@@ -95,125 +50,24 @@ export const TemplateEditor = () => {
         });
       } catch (error) {
         console.error('Error parsing template data:', error);
-        toast({
-          title: "Error",
-          description: "Failed to parse template data",
-          variant: "destructive",
-        });
       }
     }
-  }, [templateData, toast]);
+  }, [templateData]);
 
   const handleSave = async () => {
     if (!template) return;
-
-    updateTemplateMutation.mutate(template);
-  };
-
-  const addSection = () => {
-    if (!template) return;
-    
-    const newSection: Section = {
-      id: crypto.randomUUID(),
-      name: "New Section",
-      fields: []
-    };
-    
-    setTemplate({
-      ...template,
-      sections: [...template.sections, newSection]
-    });
-  };
-
-  const updateSection = (sectionId: string, updates: Partial<Section>) => {
-    if (!template) return;
-    
-    setTemplate({
-      ...template,
-      sections: template.sections.map(section =>
-        section.id === sectionId
-          ? { ...section, ...updates }
-          : section
-      )
-    });
-  };
-
-  const deleteSection = (sectionId: string) => {
-    if (!template) return;
-    
-    setTemplate({
-      ...template,
-      sections: template.sections.filter(s => s.id !== sectionId)
-    });
-  };
-
-  const addField = (sectionId: string) => {
-    if (!template) return;
-    
-    const newField: Field = {
-      id: crypto.randomUUID(),
-      name: "New Field",
-      type: "text",
-      required: false
-    };
-    
-    setTemplate({
-      ...template,
-      sections: template.sections.map(section => 
-        section.id === sectionId 
-          ? { ...section, fields: [...section.fields, newField] }
-          : section
-      )
-    });
-  };
-
-  const updateField = (sectionId: string, fieldId: string, updates: Partial<Field>) => {
-    if (!template) return;
-    
-    setTemplate({
-      ...template,
-      sections: template.sections.map(section => 
-        section.id === sectionId 
-          ? {
-              ...section,
-              fields: section.fields.map(field =>
-                field.id === fieldId
-                  ? { ...field, ...updates }
-                  : field
-              )
-            }
-          : section
-      )
-    });
-  };
-
-  const deleteField = (sectionId: string, fieldId: string) => {
-    if (!template) return;
-    
-    setTemplate({
-      ...template,
-      sections: template.sections.map(section =>
-        section.id === sectionId
-          ? {
-              ...section,
-              fields: section.fields.filter(f => f.id !== fieldId)
-            }
-          : section
-      )
-    });
+    updateTemplate(template);
   };
 
   const handleDragEnd = (result: any) => {
     if (!result.destination || !template) return;
-
-    const sections = Array.from(template.sections);
-    const [reorderedSection] = sections.splice(result.source.index, 1);
-    sections.splice(result.destination.index, 0, reorderedSection);
-
-    setTemplate({
-      ...template,
-      sections
-    });
+    
+    const updatedTemplate = reorderSections(
+      template,
+      result.source.index,
+      result.destination.index
+    );
+    setTemplate(updatedTemplate);
   };
 
   if (isLoading) {
@@ -237,7 +91,7 @@ export const TemplateEditor = () => {
       <Card className="p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-medium">Template Sections</h3>
-          <Button onClick={addSection}>
+          <Button onClick={() => setTemplate(addSection(template))}>
             <Plus className="mr-2 h-4 w-4" />
             Add Section
           </Button>
@@ -265,11 +119,11 @@ export const TemplateEditor = () => {
                         <TemplateSection
                           section={section}
                           dragHandleProps={provided.dragHandleProps}
-                          onUpdate={(updates) => updateSection(section.id, updates)}
-                          onDelete={() => deleteSection(section.id)}
-                          onAddField={() => addField(section.id)}
-                          onUpdateField={(fieldId, updates) => updateField(section.id, fieldId, updates)}
-                          onDeleteField={(fieldId) => deleteField(section.id, fieldId)}
+                          onUpdate={(updates) => setTemplate(updateSection(template, section.id, updates))}
+                          onDelete={() => setTemplate(deleteSection(template, section.id))}
+                          onAddField={() => setTemplate(addField(template, section.id))}
+                          onUpdateField={(fieldId, updates) => setTemplate(updateField(template, section.id, fieldId, updates))}
+                          onDeleteField={(fieldId) => setTemplate(deleteField(template, section.id, fieldId))}
                         />
                       </Card>
                     )}
