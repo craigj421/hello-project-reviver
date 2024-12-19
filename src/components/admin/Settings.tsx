@@ -6,6 +6,7 @@ import { LogoSection } from "./settings/LogoSection";
 import { ToggleSection } from "./settings/ToggleSection";
 import { TaxSection } from "./settings/TaxSection";
 import { TitleInsuranceSection } from "./settings/TitleInsuranceSection";
+import { CustomFeesSection } from "./settings/CustomFeesSection";
 import { useSettings } from "@/hooks/useSettings";
 import { useAuth } from "@/contexts/AuthContext";
 import { LogOut } from "lucide-react";
@@ -21,7 +22,7 @@ export const Settings = () => {
       console.log("Saving settings with logo URL:", logoPreview);
       const settingsToUpdate = {
         ...settings,
-        logo_url: logoPreview || settings.logo_url // Use existing logo_url if no new preview
+        logo_url: logoPreview || settings.logo_url
       };
       
       await updateSettings(settingsToUpdate);
@@ -73,6 +74,8 @@ export const Settings = () => {
           searchExamClosingFee={settings.searchExamClosingFee}
           onSettingChange={(key: string, value: any) => updateSettings({ [key]: value })}
         />
+
+        <CustomFeesSection />
 
         <LogoSection 
           logoPreview={settings.logo_url || logoPreview}
