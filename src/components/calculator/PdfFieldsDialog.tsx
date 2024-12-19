@@ -45,17 +45,26 @@ export const PdfFieldsDialog = ({
 
     const element = pdfRef.current;
     const opt = {
-      margin: 1,
+      margin: [0.3, 0.3], // Reduced margins [top/bottom, left/right] in inches
       filename: 'net-proceeds-calculation.pdf',
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+      html2canvas: { 
+        scale: 1.5, // Reduced scale for better fit
+        useCORS: true,
+        letterRendering: true,
+      },
+      jsPDF: { 
+        unit: 'in', 
+        format: 'letter', 
+        orientation: 'portrait',
+        compress: true,
+      }
     };
 
     try {
-      const pdf = await html2pdf().set(opt).from(element).save();
-      
-      if (action === 'print') {
+      if (action === 'download') {
+        await html2pdf().set(opt).from(element).save();
+      } else {
         const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
         const pdfUrl = URL.createObjectURL(pdfBlob);
         const printWindow = window.open(pdfUrl);
