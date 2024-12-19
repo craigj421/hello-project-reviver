@@ -25,6 +25,7 @@ interface PdfFieldsDialogProps {
   onOpenChange: (open: boolean) => void;
   details: PropertyDetails;
   onSubmit: (selectedFields: Array<keyof PropertyDetails>) => void;
+  customFees: CustomFee[];
 }
 
 export const PdfFieldsDialog = ({
@@ -32,6 +33,7 @@ export const PdfFieldsDialog = ({
   onOpenChange,
   details,
   onSubmit,
+  customFees,
 }: PdfFieldsDialogProps) => {
   const [selectedSections, setSelectedSections] = React.useState({
     propertyInfo: true,
@@ -44,29 +46,7 @@ export const PdfFieldsDialog = ({
     commissionInfo: true,
   });
 
-  const [customFees, setCustomFees] = React.useState<CustomFee[]>([]);
   const pdfRef = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    const fetchCustomFees = async () => {
-      const { data, error } = await supabase
-        .from('custom_fees')
-        .select('*')
-        .order('created_at', { ascending: true });
-
-      if (error) {
-        console.error('Error fetching custom fees:', error);
-        return;
-      }
-
-      console.log('Fetched custom fees for PDF:', data);
-      setCustomFees(data || []);
-    };
-
-    if (open) {
-      fetchCustomFees();
-    }
-  }, [open]);
 
   const handleSectionChange = (section: string, checked: boolean) => {
     setSelectedSections(prev => ({
