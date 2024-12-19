@@ -7,6 +7,7 @@ import { StateSection } from "./settings/StateSection";
 import { LogoSection } from "./settings/LogoSection";
 import { ToggleSection } from "./settings/ToggleSection";
 import { ApiSection } from "./settings/ApiSection";
+import { TaxSection } from "./settings/TaxSection";
 
 const SETTINGS_STORAGE_KEY = 'agent_settings';
 
@@ -23,6 +24,7 @@ export const Settings = () => {
       commission: "",
       state: "Florida",
       logo: null as File | null,
+      propertyTaxRate: "",
     };
   });
 
@@ -76,6 +78,11 @@ export const Settings = () => {
         <StateSection 
           state={settings.state}
           onStateChange={(value) => handleSettingChange("state", value)}
+        />
+
+        <TaxSection
+          propertyTaxRate={settings.propertyTaxRate}
+          onSettingChange={handleSettingChange}
         />
 
         <LogoSection 
