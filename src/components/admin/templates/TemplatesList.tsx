@@ -41,6 +41,17 @@ export const TemplatesList = () => {
   });
 
   const handleDelete = async (id: string) => {
+    const template = templates?.find(t => t.id === id);
+    
+    if (template?.is_default) {
+      toast({
+        title: "Cannot Delete",
+        description: "Default templates cannot be deleted",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const { error } = await supabase
       .from('document_templates')
       .delete()
@@ -64,6 +75,18 @@ export const TemplatesList = () => {
   };
 
   const setAsDefault = async (id: string) => {
+    // First, remove default status from all templates
+    const { error: updateError } = await supabase
+      .from('document_templates')
+      .update({ is_default: false })
+      .neq('id', id);
+      
+    if (updateError) {
+      console.error('Error updating other templates:', updateError);
+      return;
+    }
+
+    // Then set the selected template as default
     const { error } = await supabase
       .from('document_templates')
       .update({ is_default: true })
@@ -122,13 +145,15 @@ export const TemplatesList = () => {
                     Set Default
                   </Button>
                 )}
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => handleDelete(template.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                {!template.is_default && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleDelete(template.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
               </TableCell>
             </TableRow>
           ))}
