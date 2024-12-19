@@ -56,8 +56,10 @@ export type Database = {
           custom_fees: string[] | null
           description: string | null
           id: string
+          is_default: boolean
           name: string
           sections: Json
+          template_data: Json
           updated_at: string
           user_id: string
         }
@@ -66,8 +68,10 @@ export type Database = {
           custom_fees?: string[] | null
           description?: string | null
           id?: string
+          is_default?: boolean
           name: string
           sections?: Json
+          template_data?: Json
           updated_at?: string
           user_id: string
         }
@@ -76,8 +80,10 @@ export type Database = {
           custom_fees?: string[] | null
           description?: string | null
           id?: string
+          is_default?: boolean
           name?: string
           sections?: Json
+          template_data?: Json
           updated_at?: string
           user_id?: string
         }
