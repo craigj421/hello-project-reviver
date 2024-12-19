@@ -1,33 +1,10 @@
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { Card } from "@/components/ui/card";
-
-interface PropertyDetails {
-  sellerName: string;
-  propertyAddress: string;
-  purchasePrice: number;
-  taxesApprox: number;
-  docStampsDeed: number;
-  ownersTitleInsurance: number;
-  commissionRate: number;
-  commission: number;
-  complianceAudit: number;
-  serviceTech: number;
-  termiteInspection: number;
-  fhaVaFees: number;
-  survey: number;
-  hoa: number;
-  homeWarranty: number;
-  buyersClosingCost: number;
-  repairs: number;
-  searchExamClosingFee: number;
-  sellerPayingTitle: boolean;
-  firstMortgage: number;
-  secondMortgage: number;
-}
+import { PropertyInformation } from "./calculator/PropertyInformation";
+import { CommissionDetails } from "./calculator/CommissionDetails";
+import { ClosingCosts } from "./calculator/ClosingCosts";
+import type { PropertyDetails } from "./calculator/types";
 
 export const NetProceedsCalculator = () => {
   const { toast } = useToast();
@@ -105,105 +82,10 @@ export const NetProceedsCalculator = () => {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Basic Information */}
-        <Card className="p-4">
-          <h3 className="text-lg font-semibold mb-4">Property Information</h3>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="sellerName">Seller Name</Label>
-              <Input
-                id="sellerName"
-                value={details.sellerName}
-                onChange={(e) => handleInputChange("sellerName", e.target.value)}
-                placeholder="Enter seller's name"
-              />
-            </div>
-            <div>
-              <Label htmlFor="propertyAddress">Property Address</Label>
-              <Input
-                id="propertyAddress"
-                value={details.propertyAddress}
-                onChange={(e) => handleInputChange("propertyAddress", e.target.value)}
-                placeholder="Enter property address"
-              />
-            </div>
-            <div>
-              <Label htmlFor="purchasePrice">Purchase Price ($)</Label>
-              <Input
-                id="purchasePrice"
-                type="number"
-                value={details.purchasePrice || ""}
-                onChange={(e) => handleInputChange("purchasePrice", parseFloat(e.target.value) || 0)}
-                placeholder="Enter purchase price"
-              />
-            </div>
-          </div>
-        </Card>
-
-        {/* Commission Information */}
-        <Card className="p-4">
-          <h3 className="text-lg font-semibold mb-4">Commission Details</h3>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="commissionRate">Commission Rate (%)</Label>
-              <Input
-                id="commissionRate"
-                type="number"
-                value={details.commissionRate || ""}
-                onChange={(e) => handleInputChange("commissionRate", parseFloat(e.target.value) || 0)}
-                placeholder="Enter commission rate"
-              />
-            </div>
-            <div>
-              <Label htmlFor="commission">Commission Amount ($)</Label>
-              <Input
-                id="commission"
-                type="number"
-                value={details.commission || ""}
-                onChange={(e) => handleInputChange("commission", parseFloat(e.target.value) || 0)}
-                placeholder="Enter commission amount"
-              />
-            </div>
-          </div>
-        </Card>
-
-        {/* Closing Costs */}
-        <Card className="p-4">
-          <h3 className="text-lg font-semibold mb-4">Closing Costs</h3>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="taxesApprox">Taxes (Approximate)</Label>
-              <Input
-                id="taxesApprox"
-                type="number"
-                value={details.taxesApprox || ""}
-                onChange={(e) => handleInputChange("taxesApprox", parseFloat(e.target.value) || 0)}
-                placeholder="Enter approximate taxes"
-              />
-            </div>
-            <div>
-              <Label htmlFor="docStampsDeed">Doc Stamps Deed</Label>
-              <Input
-                id="docStampsDeed"
-                type="number"
-                value={details.docStampsDeed || ""}
-                onChange={(e) => handleInputChange("docStampsDeed", parseFloat(e.target.value) || 0)}
-                placeholder="Enter doc stamps deed"
-              />
-            </div>
-            <div>
-              <Label htmlFor="ownersTitleInsurance">Owner's Title Insurance</Label>
-              <Input
-                id="ownersTitleInsurance"
-                type="number"
-                value={details.ownersTitleInsurance || ""}
-                onChange={(e) => handleInputChange("ownersTitleInsurance", parseFloat(e.target.value) || 0)}
-                placeholder="Enter owner's title insurance"
-              />
-            </div>
-          </div>
-        </Card>
-
+        <PropertyInformation details={details} onInputChange={handleInputChange} />
+        <CommissionDetails details={details} onInputChange={handleInputChange} />
+        <ClosingCosts details={details} onInputChange={handleInputChange} />
+        
         {/* Additional Fees */}
         <Card className="p-4">
           <h3 className="text-lg font-semibold mb-4">Additional Fees</h3>
