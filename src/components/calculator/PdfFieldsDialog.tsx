@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Download, Printer } from "lucide-react";
+import html2pdf from "html2pdf.js";
 import type { PropertyDetails } from "./types";
 import { PdfPreview } from "./PdfPreview";
 
@@ -36,7 +38,42 @@ export const PdfFieldsDialog = ({
     commissionInfo: true,
   });
 
-  const handleSubmit = () => {
+  const pdfRef = React.useRef<HTMLDivElement>(null);
+
+  const handleGeneratePdf = async (action: 'download' | 'print') => {
+    if (!pdfRef.current) return;
+
+    const element = pdfRef.current;
+    const opt = {
+      margin: 1,
+      filename: 'net-proceeds-calculation.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+
+    try {
+      const pdf = await html2pdf().set(opt).from(element).save();
+      
+      if (action === 'print') {
+        const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+        const printWindow = window.open(pdfUrl);
+        if (printWindow) {
+          printWindow.onload = function() {
+            printWindow.print();
+            URL.revokeObjectURL(pdfUrl);
+          };
+        }
+      }
+      
+      onSubmit(getSelectedFields());
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    }
+  };
+
+  const getSelectedFields = () => {
     const selectedFields: Array<keyof PropertyDetails> = [];
     
     if (selectedSections.propertyInfo) {
@@ -67,7 +104,7 @@ export const PdfFieldsDialog = ({
       selectedFields.push("commissionRate", "commission");
     }
     
-    onSubmit(selectedFields);
+    return selectedFields;
   };
 
   return (
@@ -153,13 +190,27 @@ export const PdfFieldsDialog = ({
             </div>
           </div>
           <ScrollArea className="flex-1 border rounded-md">
-            <div className="p-4">
+            <div className="p-4" ref={pdfRef}>
               <PdfPreview details={details} selectedSections={selectedSections} />
             </div>
           </ScrollArea>
         </div>
-        <DialogFooter className="mt-4">
-          <Button onClick={handleSubmit}>Generate PDF</Button>
+        <DialogFooter className="mt-4 space-x-2">
+          <Button 
+            onClick={() => handleGeneratePdf('print')} 
+            variant="outline"
+            className="gap-2"
+          >
+            <Printer className="h-4 w-4" />
+            Print PDF
+          </Button>
+          <Button 
+            onClick={() => handleGeneratePdf('download')}
+            className="gap-2"
+          >
+            <Download className="h-4 w-4" />
+            Download PDF
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
