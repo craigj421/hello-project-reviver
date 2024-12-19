@@ -1,8 +1,10 @@
+import { useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { PropertyDetails } from "./types";
+import { calculateTitleInsurance } from "@/utils/titleInsurance";
 
 interface ClosingCostsProps {
   details: PropertyDetails;
@@ -10,6 +12,14 @@ interface ClosingCostsProps {
 }
 
 export const ClosingCosts = ({ details, onInputChange }: ClosingCostsProps) => {
+  useEffect(() => {
+    if (details.purchasePrice > 0) {
+      const titleInsurance = calculateTitleInsurance(details.purchasePrice);
+      console.log("Updating title insurance amount:", titleInsurance);
+      onInputChange("ownersTitleInsurance", titleInsurance);
+    }
+  }, [details.purchasePrice, onInputChange]);
+
   return (
     <Card className="p-4">
       <h3 className="text-lg font-semibold mb-4">Closing Costs</h3>
@@ -40,8 +50,9 @@ export const ClosingCosts = ({ details, onInputChange }: ClosingCostsProps) => {
             id="ownersTitleInsurance"
             type="number"
             value={details.ownersTitleInsurance || ""}
-            onChange={(e) => onInputChange("ownersTitleInsurance", parseFloat(e.target.value) || 0)}
-            placeholder="Enter owner's title insurance"
+            readOnly
+            className="bg-gray-100"
+            placeholder="Automatically calculated"
           />
         </div>
         <div className="flex items-center space-x-2">
