@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { PropertyInformation } from "./calculator/PropertyInformation";
 import { CommissionDetails } from "./calculator/CommissionDetails";
 import { ClosingCosts } from "./calculator/ClosingCosts";
@@ -17,8 +18,16 @@ import {
 } from "@/utils/netProceedsCalculations";
 import type { PropertyDetails } from "./calculator/types";
 
+interface CustomFee {
+  id: string;
+  name: string;
+  amount: number;
+  is_percentage: boolean;
+}
+
 export const NetProceedsCalculator = () => {
   const { toast } = useToast();
+  const [customFees, setCustomFees] = useState<CustomFee[]>([]);
   const [details, setDetails] = useState<PropertyDetails>({
     sellerName: "",
     propertyAddress: "",
@@ -45,10 +54,33 @@ export const NetProceedsCalculator = () => {
 
   const [dialogOpen, setDialogOpen] = useState(false);
 
+  useEffect(() => {
+    const fetchCustomFees = async () => {
+      const { data, error } = await supabase
+        .from('custom_fees')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching custom fees:', error);
+        return;
+      }
+
+      console.log('Fetched custom fees:', data);
+      setCustomFees(data || []);
+    };
+
+    fetchCustomFees();
+  }, []);
+
   const calculateResults = () => {
     const calculatedCommission = calculateCommission(details.purchasePrice, details.commissionRate);
     const detailsWithCommission = { ...details, commission: calculatedCommission };
-    const totalClosingCosts = calculateTotalClosingCosts(detailsWithCommission);
+    const totalClosingCosts = calculateTotalClosingCosts(
+      detailsWithCommission,
+      customFees,
+      details.purchasePrice
+    );
     const netProceeds = calculateNetProceeds(
       details.purchasePrice,
       totalClosingCosts,
@@ -87,7 +119,7 @@ export const NetProceedsCalculator = () => {
         <ClosingCosts details={details} onInputChange={handleInputChange} />
         <AdditionalFees details={details} onInputChange={handleInputChange} />
         <AdditionalServices details={details} onInputChange={handleInputChange} />
-        <CustomFeesSection details={details} onInputChange={handleInputChange} />
+        <CustomFeesSection details={details} customFees={customFees} />
         <OtherCosts details={details} onInputChange={handleInputChange} />
         <MortgageInformation details={details} onInputChange={handleInputChange} />
       </div>
@@ -106,6 +138,7 @@ export const NetProceedsCalculator = () => {
         onOpenChange={setDialogOpen}
         details={details}
         onSubmit={handlePdfFieldsSubmit}
+        customFees={customFees}
       />
     </div>
   );

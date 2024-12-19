@@ -1,9 +1,6 @@
-import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { supabase } from "@/integrations/supabase/client";
-import { PropertyDetails } from "./types";
 
 interface CustomFee {
   id: string;
@@ -13,35 +10,16 @@ interface CustomFee {
 }
 
 interface CustomFeesSectionProps {
-  details: PropertyDetails;
-  onInputChange: (field: keyof PropertyDetails, value: number) => void;
+  details: {
+    purchasePrice: number;
+  };
+  customFees: CustomFee[];
 }
 
-export const CustomFeesSection = ({ details, onInputChange }: CustomFeesSectionProps) => {
-  const [customFees, setCustomFees] = useState<CustomFee[]>([]);
-
-  useEffect(() => {
-    const fetchCustomFees = async () => {
-      const { data, error } = await supabase
-        .from('custom_fees')
-        .select('*')
-        .order('created_at', { ascending: true });
-
-      if (error) {
-        console.error('Error fetching custom fees:', error);
-        return;
-      }
-
-      console.log('Fetched custom fees:', data);
-      setCustomFees(data || []);
-    };
-
-    fetchCustomFees();
-  }, []);
-
+export const CustomFeesSection = ({ details, customFees }: CustomFeesSectionProps) => {
   const calculateFeeAmount = (fee: CustomFee) => {
     if (fee.is_percentage) {
-      return (details.purchasePrice * (fee.amount / 100));
+      return (details.purchasePrice * fee.amount) / 100;
     }
     return fee.amount;
   };
@@ -52,7 +30,9 @@ export const CustomFeesSection = ({ details, onInputChange }: CustomFeesSectionP
       <div className="space-y-4">
         {customFees.map((fee) => (
           <div key={fee.id}>
-            <Label htmlFor={`customFee-${fee.id}`}>{fee.name}</Label>
+            <Label htmlFor={`customFee-${fee.id}`}>
+              {fee.name} {fee.is_percentage ? `(${fee.amount}%)` : ''}
+            </Label>
             <Input
               id={`customFee-${fee.id}`}
               type="number"

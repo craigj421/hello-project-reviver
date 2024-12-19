@@ -15,6 +15,22 @@ export const calculateCommission = (purchasePrice: number, commissionRate: numbe
   return (purchasePrice * commissionRate) / 100;
 };
 
+interface CustomFee {
+  id: string;
+  name: string;
+  amount: number;
+  is_percentage: boolean;
+}
+
+export const calculateCustomFees = (purchasePrice: number, customFees: CustomFee[]) => {
+  return customFees.reduce((total, fee) => {
+    const feeAmount = fee.is_percentage ? 
+      (purchasePrice * fee.amount) / 100 : 
+      fee.amount;
+    return total + feeAmount;
+  }, 0);
+};
+
 export const calculateTotalClosingCosts = (details: {
   taxesApprox: number;
   docStampsDeed: number;
@@ -31,8 +47,9 @@ export const calculateTotalClosingCosts = (details: {
   buyersClosingCost: number;
   repairs: number;
   searchExamClosingFee: number;
-}) => {
+}, customFees: CustomFee[] = [], purchasePrice: number = 0) => {
   const titleInsuranceAmount = calculateTitleInsurance(details);
+  const totalCustomFees = calculateCustomFees(purchasePrice, customFees);
   
   const total = 
     details.taxesApprox +
@@ -48,7 +65,8 @@ export const calculateTotalClosingCosts = (details: {
     details.homeWarranty +
     details.buyersClosingCost +
     details.repairs +
-    details.searchExamClosingFee;
+    details.searchExamClosingFee +
+    totalCustomFees;
 
   console.log("Total Closing Costs Breakdown:", {
     taxesApprox: details.taxesApprox,
@@ -66,6 +84,7 @@ export const calculateTotalClosingCosts = (details: {
     buyersClosingCost: details.buyersClosingCost,
     repairs: details.repairs,
     searchExamClosingFee: details.searchExamClosingFee,
+    customFees: totalCustomFees,
     total: total
   });
 
