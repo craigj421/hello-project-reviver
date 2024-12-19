@@ -12,6 +12,7 @@ export interface Settings {
   state: string;
   logo: File | null;
   propertyTaxRate: string;
+  searchExamClosingFee: string;
 }
 
 type SettingsKey = keyof Settings;
@@ -29,6 +30,7 @@ export const useSettings = () => {
       state: "Florida",
       logo: null,
       propertyTaxRate: "",
+      searchExamClosingFee: "",
     };
   });
 

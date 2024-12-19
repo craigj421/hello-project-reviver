@@ -38,6 +38,7 @@ export const Settings = () => {
 
         <TaxSection
           propertyTaxRate={settings.propertyTaxRate}
+          searchExamClosingFee={settings.searchExamClosingFee}
           onSettingChange={(key: string, value: any) => updateSettings(key as keyof typeof settings, value)}
         />
 
