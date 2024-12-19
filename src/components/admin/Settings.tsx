@@ -8,10 +8,13 @@ import { ApiSection } from "./settings/ApiSection";
 import { TaxSection } from "./settings/TaxSection";
 import { TitleInsuranceSection } from "./settings/TitleInsuranceSection";
 import { useSettings } from "@/hooks/useSettings";
+import { useAuth } from "@/contexts/AuthContext";
+import { LogOut } from "lucide-react";
 
 export const Settings = () => {
   const { toast } = useToast();
   const { settings, updateSettings, handleLogoChange, logoPreview } = useSettings();
+  const { signOut } = useAuth();
 
   const handleSave = () => {
     console.log("Saving settings:", settings);
@@ -60,6 +63,17 @@ export const Settings = () => {
         <Button onClick={handleSave} className="w-full">
           Save Settings
         </Button>
+
+        <div className="border-t pt-4">
+          <Button 
+            variant="destructive" 
+            className="w-full" 
+            onClick={signOut}
+          >
+            <LogOut className="mr-2" />
+            Sign Out
+          </Button>
+        </div>
       </div>
     </Card>
   );
