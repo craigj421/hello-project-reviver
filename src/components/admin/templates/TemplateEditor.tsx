@@ -8,14 +8,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { FileText, Save } from "lucide-react";
+import { FileText, Save, Plus, GripVertical } from "lucide-react";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Template {
   id: string;
   name: string;
   description: string;
-  sections: any;
+  sections: Section[];
   template_data: any;
+}
+
+interface Section {
+  id: string;
+  name: string;
+  fields: Field[];
+}
+
+interface Field {
+  id: string;
+  name: string;
+  type: "text" | "number" | "date" | "select";
+  required: boolean;
+  options?: string[];
 }
 
 export const TemplateEditor = () => {
@@ -24,7 +40,6 @@ export const TemplateEditor = () => {
   const queryClient = useQueryClient();
   
   const [template, setTemplate] = useState<Template | null>(null);
-  const [sections, setSections] = useState<any[]>([]);
 
   const { data: templateData, isLoading } = useQuery({
     queryKey: ['template', id],
@@ -72,8 +87,10 @@ export const TemplateEditor = () => {
 
   useEffect(() => {
     if (templateData) {
-      setTemplate(templateData);
-      setSections(templateData.sections || []);
+      setTemplate({
+        ...templateData,
+        sections: templateData.sections || [],
+      });
     }
   }, [templateData]);
 
@@ -82,16 +99,76 @@ export const TemplateEditor = () => {
 
     updateTemplateMutation.mutate({
       ...template,
-      sections,
+      sections: template.sections,
     });
   };
 
   const addSection = () => {
-    setSections([...sections, {
+    if (!template) return;
+    
+    const newSection: Section = {
       id: crypto.randomUUID(),
       name: "New Section",
       fields: []
-    }]);
+    };
+    
+    setTemplate({
+      ...template,
+      sections: [...template.sections, newSection]
+    });
+  };
+
+  const addField = (sectionId: string) => {
+    if (!template) return;
+    
+    const newField: Field = {
+      id: crypto.randomUUID(),
+      name: "New Field",
+      type: "text",
+      required: false
+    };
+    
+    setTemplate({
+      ...template,
+      sections: template.sections.map(section => 
+        section.id === sectionId 
+          ? { ...section, fields: [...section.fields, newField] }
+          : section
+      )
+    });
+  };
+
+  const handleDragEnd = (result: any) => {
+    if (!result.destination || !template) return;
+
+    const sections = Array.from(template.sections);
+    const [reorderedSection] = sections.splice(result.source.index, 1);
+    sections.splice(result.destination.index, 0, reorderedSection);
+
+    setTemplate({
+      ...template,
+      sections
+    });
+  };
+
+  const updateField = (sectionId: string, fieldId: string, updates: Partial<Field>) => {
+    if (!template) return;
+    
+    setTemplate({
+      ...template,
+      sections: template.sections.map(section => 
+        section.id === sectionId 
+          ? {
+              ...section,
+              fields: section.fields.map(field =>
+                field.id === fieldId
+                  ? { ...field, ...updates }
+                  : field
+              )
+            }
+          : section
+      )
+    });
   };
 
   if (isLoading) {
@@ -111,7 +188,7 @@ export const TemplateEditor = () => {
             <h2 className="text-xl font-semibold">Edit Template</h2>
           </div>
           <Button onClick={handleSave}>
-            <Save className="mr-2" />
+            <Save className="mr-2 h-4 w-4" />
             Save Changes
           </Button>
         </div>
@@ -140,36 +217,123 @@ export const TemplateEditor = () => {
       <Card className="p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-medium">Template Sections</h3>
-          <Button onClick={addSection}>Add Section</Button>
+          <Button onClick={addSection}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Section
+          </Button>
         </div>
 
-        <div className="space-y-4">
-          {sections.map((section, index) => (
-            <Card key={section.id} className="p-4">
-              <div className="flex items-center gap-4">
-                <Input
-                  value={section.name}
-                  onChange={(e) => {
-                    const newSections = [...sections];
-                    newSections[index] = {
-                      ...section,
-                      name: e.target.value
-                    };
-                    setSections(newSections);
-                  }}
-                />
-                <Button
-                  variant="destructive"
-                  onClick={() => {
-                    setSections(sections.filter(s => s.id !== section.id));
-                  }}
-                >
-                  Delete
-                </Button>
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="sections">
+            {(provided) => (
+              <div
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                className="space-y-4"
+              >
+                {template.sections.map((section, index) => (
+                  <Draggable
+                    key={section.id}
+                    draggableId={section.id}
+                    index={index}
+                  >
+                    {(provided) => (
+                      <Card
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        className="p-4"
+                      >
+                        <div className="flex items-center gap-4 mb-4">
+                          <div {...provided.dragHandleProps}>
+                            <GripVertical className="h-5 w-5 text-gray-400" />
+                          </div>
+                          <Input
+                            value={section.name}
+                            onChange={(e) => {
+                              const newSections = [...template.sections];
+                              newSections[index] = {
+                                ...section,
+                                name: e.target.value
+                              };
+                              setTemplate({
+                                ...template,
+                                sections: newSections
+                              });
+                            }}
+                          />
+                          <Button
+                            variant="outline"
+                            onClick={() => addField(section.id)}
+                          >
+                            Add Field
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            onClick={() => {
+                              setTemplate({
+                                ...template,
+                                sections: template.sections.filter(s => s.id !== section.id)
+                              });
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        </div>
+
+                        <div className="space-y-4 pl-9">
+                          {section.fields.map((field) => (
+                            <div key={field.id} className="flex items-center gap-4">
+                              <Input
+                                value={field.name}
+                                onChange={(e) => updateField(section.id, field.id, { name: e.target.value })}
+                                placeholder="Field name"
+                              />
+                              <Select
+                                value={field.type}
+                                onValueChange={(value: "text" | "number" | "date" | "select") => 
+                                  updateField(section.id, field.id, { type: value })
+                                }
+                              >
+                                <SelectTrigger className="w-[180px]">
+                                  <SelectValue placeholder="Field type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="text">Text</SelectItem>
+                                  <SelectItem value="number">Number</SelectItem>
+                                  <SelectItem value="date">Date</SelectItem>
+                                  <SelectItem value="select">Select</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <Button
+                                variant="destructive"
+                                onClick={() => {
+                                  setTemplate({
+                                    ...template,
+                                    sections: template.sections.map(s =>
+                                      s.id === section.id
+                                        ? {
+                                            ...s,
+                                            fields: s.fields.filter(f => f.id !== field.id)
+                                          }
+                                        : s
+                                    )
+                                  });
+                                }}
+                              >
+                                Delete
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </Card>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
               </div>
-            </Card>
-          ))}
-        </div>
+            )}
+          </Droppable>
+        </DragDropContext>
       </Card>
     </div>
   );
