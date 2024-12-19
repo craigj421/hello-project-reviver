@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ResetPassword from "./pages/ResetPassword";
 import Pricing from "./pages/Pricing";
+import { TemplateEditor } from "./components/admin/templates/TemplateEditor";
 
 const Admin = lazy(() => import("./pages/Admin"));
 const queryClient = new QueryClient();
@@ -42,6 +43,14 @@ const App = () => (
                   <Suspense fallback={<div>Loading...</div>}>
                     <Admin />
                   </Suspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/templates/:id"
+              element={
+                <ProtectedRoute>
+                  <TemplateEditor />
                 </ProtectedRoute>
               }
             />
