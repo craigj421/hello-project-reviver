@@ -20,23 +20,32 @@ const Login = () => {
     setLoading(true);
     
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log("Attempting login with email:", email);
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
+      console.log("Login response:", { data, error });
 
-      toast({
-        title: "Login successful",
-        description: "Welcome back!",
-      });
-      
-      navigate("/");
+      if (error) {
+        console.error("Login error:", error);
+        throw error;
+      }
+
+      if (data.user) {
+        console.log("Login successful for user:", data.user.id);
+        toast({
+          title: "Login successful",
+          description: "Welcome back!",
+        });
+        navigate("/");
+      }
     } catch (error: any) {
+      console.error("Login error details:", error);
       toast({
-        title: "Error",
-        description: error.message,
+        title: "Login failed",
+        description: error.message || "An error occurred during login",
         variant: "destructive",
       });
     } finally {
@@ -49,9 +58,8 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
+      console.log("Attempting password reset for email:", email);
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
 
       if (error) throw error;
 
@@ -61,6 +69,7 @@ const Login = () => {
       });
       setResetPasswordMode(false);
     } catch (error: any) {
+      console.error("Password reset error:", error);
       toast({
         title: "Error",
         description: error.message,
