@@ -9,6 +9,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ResetPassword from "./pages/ResetPassword";
 
 const Admin = lazy(() => import("./pages/Admin"));
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => (
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route
               path="/"
               element={
