@@ -74,6 +74,7 @@ export const PdfPreview = ({ details, selectedSections, customFees }: PdfPreview
           details={details} 
           selectedSections={selectedSections}
           formatCurrency={formatCurrency}
+          customFees={customFees}
         />
 
         <div className="flex justify-between pt-8 mt-8 border-t">

@@ -4,6 +4,13 @@ import {
   calculateNetProceeds
 } from "@/utils/netProceedsCalculations";
 
+interface CustomFee {
+  id: string;
+  name: string;
+  amount: number;
+  is_percentage: boolean;
+}
+
 interface NetProceedsSectionProps {
   details: PropertyDetails;
   selectedSections: {
@@ -14,18 +21,32 @@ interface NetProceedsSectionProps {
     additionalServices: boolean;
     otherCosts: boolean;
     commissionInfo: boolean;
+    customFees: boolean;
   };
   formatCurrency: (amount: number) => string;
+  customFees: CustomFee[];
 }
 
-export const NetProceedsSection = ({ details, selectedSections, formatCurrency }: NetProceedsSectionProps) => {
-  const totalClosingCosts = calculateTotalClosingCosts(details);
+export const NetProceedsSection = ({ 
+  details, 
+  selectedSections, 
+  formatCurrency,
+  customFees 
+}: NetProceedsSectionProps) => {
+  const totalClosingCosts = calculateTotalClosingCosts(details, customFees, details.purchasePrice);
   const netProceeds = calculateNetProceeds(
     details.purchasePrice,
     totalClosingCosts,
     details.firstMortgage,
     details.secondMortgage
   );
+
+  console.log("PDF Preview - Net Proceeds Calculation:", {
+    purchasePrice: details.purchasePrice,
+    totalClosingCosts,
+    customFees,
+    netProceeds
+  });
 
   return (
     <div className="mt-8 pt-4 border-t space-y-4">
