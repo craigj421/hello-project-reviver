@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { Plus } from "lucide-react";
+import { Plus, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Template, Section, Field } from "@/types/template";
@@ -21,6 +21,7 @@ import {
 export const TemplateEditor = () => {
   console.log("TemplateEditor component mounted");
   const { id } = useParams();
+  const navigate = useNavigate();
   console.log("Template ID from params:", id);
   
   const [template, setTemplate] = useState<Template | null>(null);
@@ -100,6 +101,17 @@ export const TemplateEditor = () => {
   console.log("Rendering template:", template);
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center mb-4">
+        <Button
+          variant="outline"
+          onClick={() => navigate("/")}
+          className="flex items-center gap-2"
+        >
+          <Home className="h-4 w-4" />
+          Go Home
+        </Button>
+      </div>
+
       <Card className="p-6">
         <TemplateHeader
           template={template}
