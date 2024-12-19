@@ -1,36 +1,30 @@
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/lib/supabase";
 
 const Pricing = () => {
-  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleCheckout = async (priceId: string) => {
+  const handleSubscribe = async () => {
     try {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
-      if (!session) {
-        navigate('/login');
-        return;
-      }
-
-      const response = await fetch('/.netlify/functions/create-checkout', {
-        method: 'POST',
+      const { data: { session } } = await supabase.auth.getSession();
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${session?.access_token}`,
         },
-        body: JSON.stringify({
-          priceId,
-          successUrl: `${window.location.origin}/`,
-          cancelUrl: `${window.location.origin}/pricing`,
-        }),
       });
 
-      const { url } = await response.json();
-      window.location.href = url;
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      }
     } catch (error) {
-      console.error('Error creating checkout session:', error);
+      console.error('Error:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to start checkout process",
+        variant: "destructive",
+      });
     }
   };
 
@@ -38,201 +32,41 @@ const Pricing = () => {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Simple, transparent pricing</h1>
-          <p className="text-xl text-muted-foreground">
-            Choose the plan that's right for you
-          </p>
+          <h1 className="text-4xl font-bold mb-4">Choose Your Plan</h1>
+          <p className="text-muted-foreground">Get started with our premium features today</p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          {/* Free Tier */}
-          <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-            <div className="p-6 space-y-4">
-              <h3 className="text-2xl font-bold">Free</h3>
-              <div className="text-4xl font-bold">$0</div>
-              <p className="text-sm text-muted-foreground">Perfect for trying out our service</p>
-            </div>
-            <div className="p-6 space-y-4 border-t">
-              <ul className="space-y-2">
-                <li className="flex items-center">
-                  <svg
-                    className="mr-2 h-4 w-4"
-                    fill="none"
-                    height="24"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    width="24"
-                  >
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                  5 templates per month
-                </li>
-                <li className="flex items-center">
-                  <svg
-                    className="mr-2 h-4 w-4"
-                    fill="none"
-                    height="24"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    width="24"
-                  >
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                  Basic support
-                </li>
-              </ul>
-              <Button
-                className="w-full"
-                variant="outline"
-                onClick={() => navigate('/')}
-              >
-                Get Started
-              </Button>
-            </div>
+        <div className="max-w-md mx-auto rounded-lg border bg-card p-8">
+          <h2 className="text-2xl font-semibold mb-4">Pro Plan</h2>
+          <div className="mb-6">
+            <p className="text-3xl font-bold">$29/month</p>
+            <p className="text-muted-foreground">Billed monthly</p>
           </div>
+          
+          <ul className="space-y-3 mb-8">
+            <li className="flex items-center">
+              <svg className="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+              Feature 1
+            </li>
+            <li className="flex items-center">
+              <svg className="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+              Feature 2
+            </li>
+            <li className="flex items-center">
+              <svg className="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+              Feature 3
+            </li>
+          </ul>
 
-          {/* Pro Tier */}
-          <div className="rounded-lg border bg-card text-card-foreground shadow-sm relative">
-            <div className="absolute -top-4 left-0 right-0 mx-auto w-fit px-4 py-1 rounded-full bg-primary text-primary-foreground text-sm font-medium">
-              Popular
-            </div>
-            <div className="p-6 space-y-4">
-              <h3 className="text-2xl font-bold">Pro</h3>
-              <div className="text-4xl font-bold">$10</div>
-              <p className="text-sm text-muted-foreground">Perfect for professionals</p>
-            </div>
-            <div className="p-6 space-y-4 border-t">
-              <ul className="space-y-2">
-                <li className="flex items-center">
-                  <svg
-                    className="mr-2 h-4 w-4"
-                    fill="none"
-                    height="24"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    width="24"
-                  >
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                  50 templates per month
-                </li>
-                <li className="flex items-center">
-                  <svg
-                    className="mr-2 h-4 w-4"
-                    fill="none"
-                    height="24"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    width="24"
-                  >
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                  Priority support
-                </li>
-                <li className="flex items-center">
-                  <svg
-                    className="mr-2 h-4 w-4"
-                    fill="none"
-                    height="24"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    width="24"
-                  >
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                  Advanced features
-                </li>
-              </ul>
-              <Button
-                className="w-full"
-                onClick={() => handleCheckout('price_1OWvmqKMoCL2K7BtJxv4cjnx')}
-              >
-                Subscribe
-              </Button>
-            </div>
-          </div>
-
-          {/* Enterprise Tier */}
-          <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-            <div className="p-6 space-y-4">
-              <h3 className="text-2xl font-bold">Enterprise</h3>
-              <div className="text-4xl font-bold">$50</div>
-              <p className="text-sm text-muted-foreground">For large organizations</p>
-            </div>
-            <div className="p-6 space-y-4 border-t">
-              <ul className="space-y-2">
-                <li className="flex items-center">
-                  <svg
-                    className="mr-2 h-4 w-4"
-                    fill="none"
-                    height="24"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    width="24"
-                  >
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                  Unlimited templates
-                </li>
-                <li className="flex items-center">
-                  <svg
-                    className="mr-2 h-4 w-4"
-                    fill="none"
-                    height="24"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    width="24"
-                  >
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                  24/7 support
-                </li>
-                <li className="flex items-center">
-                  <svg
-                    className="mr-2 h-4 w-4"
-                    fill="none"
-                    height="24"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    width="24"
-                  >
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                  Custom features
-                </li>
-              </ul>
-              <Button
-                className="w-full"
-                onClick={() => handleCheckout('price_1OWvnVKMoCL2K7BtbfmUQA5e')}
-              >
-                Subscribe
-              </Button>
-            </div>
-          </div>
+          <Button onClick={handleSubscribe} className="w-full">
+            Subscribe Now
+          </Button>
         </div>
       </div>
     </div>

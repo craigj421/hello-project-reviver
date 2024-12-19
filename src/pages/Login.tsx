@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -20,40 +20,23 @@ const Login = () => {
     setLoading(true);
     
     try {
-      console.log("Starting login process for email:", email);
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      console.log("Login response:", { 
-        success: !!data.user,
-        userId: data.user?.id,
-        error: error?.message 
-      });
+      if (error) throw error;
 
-      if (error) {
-        console.error("Login error details:", error);
-        throw error;
-      }
-
-      if (data.user) {
-        console.log("Login successful, user ID:", data.user.id);
-        console.log("Session data:", data.session);
-        
-        toast({
-          title: "Login successful",
-          description: "Welcome back!",
-        });
-        
-        console.log("Navigating to home page");
-        navigate("/");
-      }
-    } catch (error: any) {
-      console.error("Login error details:", error);
       toast({
-        title: "Login failed",
-        description: error.message || "An error occurred during login",
+        title: "Login successful",
+        description: "Welcome back!",
+      });
+      
+      navigate("/");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
         variant: "destructive",
       });
     } finally {
@@ -66,8 +49,9 @@ const Login = () => {
     setLoading(true);
 
     try {
-      console.log("Attempting password reset for email:", email);
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
 
       if (error) throw error;
 
@@ -77,7 +61,6 @@ const Login = () => {
       });
       setResetPasswordMode(false);
     } catch (error: any) {
-      console.error("Password reset error:", error);
       toast({
         title: "Error",
         description: error.message,

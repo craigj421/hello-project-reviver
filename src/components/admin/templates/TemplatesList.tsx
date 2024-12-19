@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Star, Trash2, FileEdit } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
 
 interface Template {
   id: string;
@@ -18,12 +17,10 @@ interface Template {
 export const TemplatesList = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { user } = useAuth();
   
   const { data: templates, refetch } = useQuery({
     queryKey: ['templates'],
     queryFn: async () => {
-      console.log("Fetching templates for user:", user?.id);
       const { data, error } = await supabase
         .from('document_templates')
         .select('*')
@@ -39,25 +36,11 @@ export const TemplatesList = () => {
         return [];
       }
       
-      console.log("Templates fetched successfully:", data);
       return data as Template[];
     },
   });
 
   const handleDelete = async (id: string) => {
-    console.log("Attempting to delete template:", id);
-    const template = templates?.find(t => t.id === id);
-    
-    if (template?.is_default) {
-      console.log("Prevented deletion of default template:", id);
-      toast({
-        title: "Cannot Delete",
-        description: "Default templates cannot be deleted",
-        variant: "destructive",
-      });
-      return;
-    }
-
     const { error } = await supabase
       .from('document_templates')
       .delete()
@@ -73,7 +56,6 @@ export const TemplatesList = () => {
       return;
     }
     
-    console.log("Template deleted successfully:", id);
     toast({
       title: "Success",
       description: "Template deleted successfully",
@@ -82,19 +64,6 @@ export const TemplatesList = () => {
   };
 
   const setAsDefault = async (id: string) => {
-    console.log("Attempting to set template as default:", id);
-    // First, remove default status from all templates
-    const { error: updateError } = await supabase
-      .from('document_templates')
-      .update({ is_default: false })
-      .neq('id', id);
-      
-    if (updateError) {
-      console.error('Error updating other templates:', updateError);
-      return;
-    }
-
-    // Then set the selected template as default
     const { error } = await supabase
       .from('document_templates')
       .update({ is_default: true })
@@ -110,7 +79,6 @@ export const TemplatesList = () => {
       return;
     }
     
-    console.log("Template set as default successfully:", id);
     toast({
       title: "Success",
       description: "Default template updated successfully",
@@ -154,15 +122,13 @@ export const TemplatesList = () => {
                     Set Default
                   </Button>
                 )}
-                {!template.is_default && (
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => handleDelete(template.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => handleDelete(template.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </TableCell>
             </TableRow>
           ))}

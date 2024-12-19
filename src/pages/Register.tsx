@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 
 const Register = () => {
   const [email, setEmail] = useState("");
@@ -19,37 +19,12 @@ const Register = () => {
     setLoading(true);
     
     try {
-      console.log("Starting registration process for email:", email);
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          emailRedirectTo: window.location.origin + '/login'
-        }
       });
 
       if (error) throw error;
-
-      console.log("Registration response:", {
-        userId: data.user?.id,
-        email: data.user?.email,
-        session: !!data.session
-      });
-
-      // Check if profile was created
-      if (data.user) {
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', data.user.id)
-          .single();
-
-        console.log("Profile creation check:", {
-          profileExists: !!profile,
-          profileError,
-          userId: data.user.id
-        });
-      }
 
       toast({
         title: "Registration successful",
@@ -58,7 +33,6 @@ const Register = () => {
       
       navigate("/login");
     } catch (error: any) {
-      console.error("Registration error:", error);
       toast({
         title: "Error",
         description: error.message,
