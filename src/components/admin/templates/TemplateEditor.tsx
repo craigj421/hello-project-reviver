@@ -64,30 +64,39 @@ export const TemplateEditor = () => {
 
   useEffect(() => {
     if (templateData) {
-      // Ensure sections is properly typed when parsing from JSON
-      const parsedSections = Array.isArray(templateData.sections) 
-        ? templateData.sections.map(section => ({
-            id: section.id || crypto.randomUUID(),
-            name: section.name || '',
-            fields: Array.isArray(section.fields) 
-              ? section.fields.map(field => ({
-                  id: field.id || crypto.randomUUID(),
-                  name: field.name || '',
-                  type: field.type || 'text',
-                  required: field.required || false,
-                  options: field.options || []
-                }))
-              : []
-          }))
-        : [];
+      try {
+        // Parse sections from JSON if needed
+        const parsedSections: Section[] = Array.isArray(templateData.sections) 
+          ? templateData.sections.map((section: any) => ({
+              id: section.id || crypto.randomUUID(),
+              name: section.name || '',
+              fields: Array.isArray(section.fields) 
+                ? section.fields.map((field: any) => ({
+                    id: field.id || crypto.randomUUID(),
+                    name: field.name || '',
+                    type: field.type || 'text',
+                    required: field.required || false,
+                    options: field.options || []
+                  }))
+                : []
+            }))
+          : [];
 
-      setTemplate({
-        ...templateData,
-        sections: parsedSections,
-        description: templateData.description || '',
-      });
+        setTemplate({
+          ...templateData,
+          sections: parsedSections,
+          description: templateData.description || '',
+        });
+      } catch (error) {
+        console.error('Error parsing template data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to parse template data",
+          variant: "destructive",
+        });
+      }
     }
-  }, [templateData]);
+  }, [templateData, toast]);
 
   const handleSave = async () => {
     if (!template) return;

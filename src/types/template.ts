@@ -30,7 +30,7 @@ export interface TemplateData {
   id?: string;
   is_default?: boolean;
   name: string;
-  sections?: Json;
+  sections: Section[];
   template_data?: Json;
   updated_at?: string;
   user_id: string;

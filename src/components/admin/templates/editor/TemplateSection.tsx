@@ -1,7 +1,7 @@
 import { GripVertical, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Section } from "@/types/template";
+import { Section, Field } from "@/types/template";
 import { TemplateField } from "./TemplateField";
 
 interface TemplateSectionProps {
