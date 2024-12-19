@@ -18,22 +18,25 @@ const ResetPassword = () => {
     // Check if we have an access token in the URL
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const accessToken = hashParams.get("access_token");
+    const type = hashParams.get("type");
     
-    if (accessToken) {
-      console.log("Access token found in URL");
+    console.log("URL hash parameters:", { accessToken, type });
+    
+    if (!accessToken || type !== "recovery") {
+      console.log("Invalid or missing reset token");
+      toast({
+        title: "Error",
+        description: "Invalid or missing reset token. Please request a new password reset link.",
+        variant: "destructive",
+      });
+      navigate("/login");
+    } else {
+      console.log("Valid recovery token found");
       // Set the session with the access token
       supabase.auth.setSession({
         access_token: accessToken,
         refresh_token: "",
       });
-    } else {
-      console.log("No access token found in URL");
-      toast({
-        title: "Error",
-        description: "Invalid or missing reset token",
-        variant: "destructive",
-      });
-      navigate("/login");
     }
   }, [navigate, toast]);
 
@@ -49,25 +52,41 @@ const ResetPassword = () => {
       return;
     }
 
+    if (password.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters long",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
+      console.log("Attempting to update password");
       const { error } = await supabase.auth.updateUser({
         password: password,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error updating password:", error);
+        throw error;
+      }
 
+      console.log("Password updated successfully");
       toast({
         title: "Success",
-        description: "Password has been reset successfully",
+        description: "Password has been reset successfully. Please log in with your new password.",
       });
       
+      // Sign out the user after successful password reset
+      await supabase.auth.signOut();
       navigate("/login");
     } catch (error: any) {
-      console.error("Error resetting password:", error);
+      console.error("Error in password reset:", error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "An error occurred while resetting your password",
         variant: "destructive",
       });
     } finally {
@@ -93,6 +112,7 @@ const ResetPassword = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              minLength={6}
             />
           </div>
 
@@ -105,6 +125,7 @@ const ResetPassword = () => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
+              minLength={6}
             />
           </div>
 
