@@ -13,20 +13,28 @@ export const PropertyInformation = ({ details, onInputChange }: PropertyInformat
   useEffect(() => {
     if (details.purchasePrice > 0) {
       const savedSettings = localStorage.getItem('agent_settings');
-      const settings = savedSettings ? JSON.parse(savedSettings) : { propertyTaxRate: "0" };
-      
-      const taxRate = parseFloat(settings.propertyTaxRate) || 0;
-      const calculatedTaxes = (details.purchasePrice * (taxRate / 100));
-      
-      console.log("Calculating property taxes:", {
-        purchasePrice: details.purchasePrice,
-        taxRate,
-        calculatedTaxes
-      });
-      
-      onInputChange("taxesApprox", calculatedTaxes);
+      if (savedSettings) {
+        const settings = JSON.parse(savedSettings);
+        const taxRate = parseFloat(settings.propertyTaxRate) || 0;
+        const calculatedTaxes = (details.purchasePrice * (taxRate / 100));
+        
+        console.log("Calculating property taxes:", {
+          purchasePrice: details.purchasePrice,
+          taxRate,
+          calculatedTaxes
+        });
+        
+        onInputChange("taxesApprox", calculatedTaxes);
+      }
     }
   }, [details.purchasePrice, onInputChange]);
+
+  const handlePurchasePriceChange = (value: string) => {
+    const numericValue = parseFloat(value) || 0;
+    if (numericValue >= 0) {
+      onInputChange("purchasePrice", numericValue);
+    }
+  };
 
   return (
     <Card className="p-4">
@@ -55,8 +63,9 @@ export const PropertyInformation = ({ details, onInputChange }: PropertyInformat
           <Input
             id="purchasePrice"
             type="number"
+            min="0"
             value={details.purchasePrice || ""}
-            onChange={(e) => onInputChange("purchasePrice", parseFloat(e.target.value) || 0)}
+            onChange={(e) => handlePurchasePriceChange(e.target.value)}
             placeholder="Enter purchase price"
           />
         </div>

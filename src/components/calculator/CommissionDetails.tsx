@@ -1,8 +1,8 @@
+import { useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { PropertyDetails } from "./types";
-import { useEffect } from "react";
 
 interface CommissionDetailsProps {
   details: PropertyDetails;
@@ -11,7 +11,17 @@ interface CommissionDetailsProps {
 
 export const CommissionDetails = ({ details, onInputChange }: CommissionDetailsProps) => {
   useEffect(() => {
-    // Calculate commission amount whenever rate or purchase price changes
+    const savedSettings = localStorage.getItem('agent_settings');
+    if (savedSettings) {
+      const settings = JSON.parse(savedSettings);
+      if (settings.commission) {
+        console.log("Setting default commission rate from settings:", settings.commission);
+        onInputChange("commissionRate", parseFloat(settings.commission));
+      }
+    }
+  }, [onInputChange]);
+
+  useEffect(() => {
     const calculatedCommission = (details.purchasePrice * details.commissionRate) / 100;
     console.log("Calculating commission:", {
       purchasePrice: details.purchasePrice,
@@ -20,6 +30,13 @@ export const CommissionDetails = ({ details, onInputChange }: CommissionDetailsP
     });
     onInputChange("commission", calculatedCommission);
   }, [details.purchasePrice, details.commissionRate, onInputChange]);
+
+  const handleCommissionRateChange = (value: string) => {
+    const numericValue = parseFloat(value) || 0;
+    if (numericValue >= 0 && numericValue <= 100) {
+      onInputChange("commissionRate", numericValue);
+    }
+  };
 
   return (
     <Card className="p-4">
@@ -30,8 +47,11 @@ export const CommissionDetails = ({ details, onInputChange }: CommissionDetailsP
           <Input
             id="commissionRate"
             type="number"
+            min="0"
+            max="100"
+            step="0.1"
             value={details.commissionRate || ""}
-            onChange={(e) => onInputChange("commissionRate", parseFloat(e.target.value) || 0)}
+            onChange={(e) => handleCommissionRateChange(e.target.value)}
             placeholder="Enter commission rate"
           />
         </div>

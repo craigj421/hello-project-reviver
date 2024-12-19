@@ -21,18 +21,44 @@ interface PdfPreviewProps {
 }
 
 export const PdfPreview = ({ details, selectedSections }: PdfPreviewProps) => {
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount);
+  };
+
   return (
     <Card className="p-6 max-w-[800px] mx-auto bg-white text-black">
       <div className="space-y-6">
         <Header />
         <SellerSection details={details} visible={selectedSections.propertyInfo} />
-        <ClosingCostsSection details={details} visible={selectedSections.closingCosts} />
-        <AdditionalFeesSection details={details} visible={selectedSections.additionalFees} />
-        <AdditionalServicesSection details={details} visible={selectedSections.additionalServices} />
-        <MortgageSection details={details} visible={selectedSections.mortgageInfo} />
-        <NetProceedsSection details={details} selectedSections={selectedSections} />
+        <ClosingCostsSection 
+          details={details} 
+          visible={selectedSections.closingCosts}
+          formatCurrency={formatCurrency}
+        />
+        <AdditionalFeesSection 
+          details={details} 
+          visible={selectedSections.additionalFees}
+          formatCurrency={formatCurrency}
+        />
+        <AdditionalServicesSection 
+          details={details} 
+          visible={selectedSections.additionalServices}
+          formatCurrency={formatCurrency}
+        />
+        <MortgageSection 
+          details={details} 
+          visible={selectedSections.mortgageInfo}
+          formatCurrency={formatCurrency}
+        />
+        <NetProceedsSection 
+          details={details} 
+          selectedSections={selectedSections}
+          formatCurrency={formatCurrency}
+        />
 
-        {/* Signature Lines */}
         <div className="flex justify-between pt-8 mt-8 border-t">
           <div className="flex flex-col items-center">
             <div className="w-48 border-t border-black mt-8"></div>
@@ -44,7 +70,6 @@ export const PdfPreview = ({ details, selectedSections }: PdfPreviewProps) => {
           </div>
         </div>
 
-        {/* Disclaimer */}
         <div className="text-xs text-gray-500 mt-4">
           *This is NOT an ESTIMATION and may not include all expenses such as HOA, insurance or taxes.
         </div>
