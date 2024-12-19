@@ -1,55 +1,49 @@
-interface TitleRateRange {
-  min: number;
-  max: number;
-  rate: number;
-  minimumFee?: number;
+export interface TitleRate {
+  minAmount: number;
+  maxAmount: number;
+  ratePerThousand: number;
 }
-
-interface StateRates {
-  [key: string]: TitleRateRange[];
-}
-
-// Initial rates for Florida, can be expanded for other states
-const STATE_TITLE_RATES: StateRates = {
-  FL: [
-    { min: 0, max: 100000, rate: 5.75, minimumFee: 100 },
-    { min: 100000, max: 1000000, rate: 5.00 },
-    { min: 1000000, max: 5000000, rate: 2.50 },
-    { min: 5000000, max: 10000000, rate: 2.25 },
-    { min: 10000000, max: Infinity, rate: 2.00 }
-  ]
-};
 
 export const calculateTitleInsurance = (purchasePrice: number, state: string = 'FL'): number => {
   console.log(`Calculating title insurance for ${state} with purchase price: ${purchasePrice}`);
   
-  const stateRates = STATE_TITLE_RATES[state];
-  if (!stateRates) {
-    console.warn(`No title insurance rates found for state: ${state}`);
+  const savedSettings = localStorage.getItem('agent_settings');
+  if (!savedSettings) {
+    console.warn('No settings found in localStorage');
     return 0;
   }
 
+  const settings = JSON.parse(savedSettings);
+  const rates = settings.titleInsuranceRates;
+
+  if (!rates || rates.length === 0) {
+    console.warn('No title insurance rates found in settings');
+    return 0;
+  }
+
+  console.log('Using title insurance rates:', rates);
+  
   let insurance = 0;
   let remainingPrice = purchasePrice;
 
-  for (const range of stateRates) {
+  // Sort rates by minAmount to ensure proper calculation order
+  const sortedRates = [...rates].sort((a, b) => a.minAmount - b.minAmount);
+
+  for (const rate of sortedRates) {
     if (remainingPrice <= 0) break;
+    
+    if (purchasePrice >= rate.minAmount) {
+      const rangeAmount = Math.min(
+        remainingPrice,
+        rate.maxAmount === 0 ? remainingPrice : rate.maxAmount - rate.minAmount
+      );
 
-    const rangeAmount = Math.min(
-      remainingPrice,
-      range.max === Infinity ? remainingPrice : range.max - range.min
-    );
+      const rangeInsurance = (rangeAmount * rate.ratePerThousand) / 1000;
+      insurance += rangeInsurance;
+      remainingPrice -= rangeAmount;
 
-    const rangeInsurance = (rangeAmount * range.rate) / 1000;
-    insurance += rangeInsurance;
-    remainingPrice -= rangeAmount;
-
-    console.log(`Range ${range.min}-${range.max}: Added ${rangeInsurance}`);
-  }
-
-  // Apply minimum fee if applicable
-  if (stateRates[0].minimumFee && insurance < stateRates[0].minimumFee) {
-    insurance = stateRates[0].minimumFee;
+      console.log(`Range ${rate.minAmount}-${rate.maxAmount}: Added ${rangeInsurance}`);
+    }
   }
 
   console.log(`Final title insurance amount: ${insurance}`);
