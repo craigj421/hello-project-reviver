@@ -24,7 +24,7 @@ const Register = () => {
         email,
         password,
         options: {
-          emailRedirectTo: 'https://preview--hello-project-reviver.lovable.app/login'
+          emailRedirectTo: window.location.origin + '/login'
         }
       });
 
