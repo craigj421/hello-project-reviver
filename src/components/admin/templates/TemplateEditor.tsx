@@ -37,10 +37,16 @@ export const TemplateEditor = () => {
   });
 
   const updateTemplateMutation = useMutation({
-    mutationFn: async (updatedTemplate: Partial<TemplateData>) => {
+    mutationFn: async (updatedTemplate: Partial<Template>) => {
+      // Convert sections to JSON-compatible format before saving
+      const templateDataToSave: Partial<TemplateData> = {
+        ...updatedTemplate,
+        sections: JSON.parse(JSON.stringify(updatedTemplate.sections)),
+      };
+
       const { error } = await supabase
         .from('document_templates')
-        .update(updatedTemplate)
+        .update(templateDataToSave)
         .eq('id', id);
 
       if (error) throw error;
@@ -101,14 +107,7 @@ export const TemplateEditor = () => {
   const handleSave = async () => {
     if (!template) return;
 
-    const templateDataToUpdate: Partial<TemplateData> = {
-      name: template.name,
-      description: template.description,
-      sections: template.sections,
-      template_data: template.template_data,
-    };
-
-    updateTemplateMutation.mutate(templateDataToUpdate);
+    updateTemplateMutation.mutate(template);
   };
 
   const addSection = () => {
