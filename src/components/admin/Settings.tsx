@@ -19,7 +19,13 @@ export const Settings = () => {
 
   const handleSave = async () => {
     try {
-      await updateSettings(settings);
+      const settingsToUpdate = {
+        ...settings,
+        logo_url: logoPreview // Ensure logo_url is included in the update
+      };
+      
+      await updateSettings(settingsToUpdate);
+      
       toast({
         title: "Settings saved",
         description: "Your settings have been saved successfully.",
@@ -54,18 +60,18 @@ export const Settings = () => {
         <AgentInfoSection 
           agentName={settings.agentName}
           commission={settings.commission}
-          onSettingChange={(key: string, value: any) => updateSettings(key as keyof typeof settings, value)}
+          onSettingChange={(key: string, value: any) => updateSettings({ [key]: value })}
         />
 
         <TitleInsuranceSection
           rates={settings.titleInsuranceRates}
-          onRatesChange={(rates) => updateSettings("titleInsuranceRates", rates)}
+          onRatesChange={(rates) => updateSettings({ titleInsuranceRates: rates })}
         />
 
         <TaxSection
           propertyTaxRate={settings.propertyTaxRate}
           searchExamClosingFee={settings.searchExamClosingFee}
-          onSettingChange={(key: string, value: any) => updateSettings(key as keyof typeof settings, value)}
+          onSettingChange={(key: string, value: any) => updateSettings({ [key]: value })}
         />
 
         <LogoSection 
@@ -75,12 +81,12 @@ export const Settings = () => {
 
         <ToggleSection 
           settings={settings}
-          onToggle={(key) => updateSettings(key as keyof typeof settings, !settings[key as keyof typeof settings])}
+          onToggle={(key) => updateSettings({ [key]: !settings[key as keyof typeof settings] })}
         />
 
         <ApiSection 
           apiKey={settings.apiKey}
-          onApiKeyChange={(value) => updateSettings("apiKey", value)}
+          onApiKeyChange={(value) => updateSettings({ apiKey: value })}
         />
 
         <Button onClick={handleSave} className="w-full">
