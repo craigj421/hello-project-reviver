@@ -10,6 +10,7 @@ export const useTemplateData = (id: string) => {
   const { data: templateData, isLoading } = useQuery({
     queryKey: ['template', id],
     queryFn: async () => {
+      console.log("Fetching template data for ID:", id);
       const { data, error } = await supabase
         .from('document_templates')
         .select('*')
@@ -21,12 +22,14 @@ export const useTemplateData = (id: string) => {
         throw error;
       }
 
+      console.log("Template data received from Supabase:", data);
       return data;
     },
   });
 
   const updateTemplateMutation = useMutation({
     mutationFn: async (updatedTemplate: Partial<Template>) => {
+      console.log("Starting template update with data:", updatedTemplate);
       // Convert sections to JSON-compatible format before saving
       const templateDataToSave = {
         name: updatedTemplate.name,
@@ -36,14 +39,22 @@ export const useTemplateData = (id: string) => {
         is_default: updatedTemplate.is_default
       };
 
+      console.log("Processed template data to save:", templateDataToSave);
+
       const { error } = await supabase
         .from('document_templates')
         .update(templateDataToSave)
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error in mutation:', error);
+        throw error;
+      }
+      
+      console.log("Template update successful");
     },
     onSuccess: () => {
+      console.log("Mutation successful, invalidating queries");
       queryClient.invalidateQueries({ queryKey: ['template', id] });
       toast({
         title: "Success",

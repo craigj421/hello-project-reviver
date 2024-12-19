@@ -19,35 +19,50 @@ import {
 } from "./utils/templateOperations";
 
 export const TemplateEditor = () => {
+  console.log("TemplateEditor component mounted");
   const { id } = useParams();
+  console.log("Template ID from params:", id);
+  
   const [template, setTemplate] = useState<Template | null>(null);
   const { templateData, isLoading, updateTemplate } = useTemplateData(id!);
 
   useEffect(() => {
+    console.log("useEffect triggered with templateData:", templateData);
+    
     if (templateData) {
       try {
+        console.log("Starting to parse template sections");
         // Parse sections from JSON if needed
         const parsedSections: Section[] = Array.isArray(templateData.sections) 
-          ? templateData.sections.map((section: any) => ({
-              id: section.id || crypto.randomUUID(),
-              name: section.name || '',
-              fields: Array.isArray(section.fields) 
-                ? section.fields.map((field: any) => ({
-                    id: field.id || crypto.randomUUID(),
-                    name: field.name || '',
-                    type: field.type || 'text',
-                    required: field.required || false,
-                    options: field.options || []
-                  }))
-                : []
-            }))
+          ? templateData.sections.map((section: any) => {
+              console.log("Parsing section:", section);
+              return {
+                id: section.id || crypto.randomUUID(),
+                name: section.name || '',
+                fields: Array.isArray(section.fields) 
+                  ? section.fields.map((field: any) => {
+                      console.log("Parsing field:", field);
+                      return {
+                        id: field.id || crypto.randomUUID(),
+                        name: field.name || '',
+                        type: field.type || 'text',
+                        required: field.required || false,
+                        options: field.options || []
+                      };
+                    })
+                  : []
+              };
+            })
           : [];
+        
+        console.log("Parsed sections:", parsedSections);
 
         setTemplate({
           ...templateData,
           sections: parsedSections,
           description: templateData.description || '',
         });
+        console.log("Template state updated successfully");
       } catch (error) {
         console.error('Error parsing template data:', error);
       }
@@ -55,11 +70,13 @@ export const TemplateEditor = () => {
   }, [templateData]);
 
   const handleSave = async () => {
+    console.log("Save triggered with template:", template);
     if (!template) return;
     updateTemplate(template);
   };
 
   const handleDragEnd = (result: any) => {
+    console.log("Drag end triggered with result:", result);
     if (!result.destination || !template) return;
     
     const updatedTemplate = reorderSections(
@@ -71,19 +88,25 @@ export const TemplateEditor = () => {
   };
 
   if (isLoading) {
+    console.log("Template editor is loading");
     return <div>Loading...</div>;
   }
 
   if (!template) {
+    console.log("No template found");
     return <div>Template not found</div>;
   }
 
+  console.log("Rendering template:", template);
   return (
     <div className="space-y-6">
       <Card className="p-6">
         <TemplateHeader
           template={template}
-          onTemplateChange={(updates) => setTemplate({ ...template, ...updates })}
+          onTemplateChange={(updates) => {
+            console.log("Template header updates:", updates);
+            setTemplate({ ...template, ...updates });
+          }}
           onSave={handleSave}
         />
       </Card>
@@ -91,7 +114,10 @@ export const TemplateEditor = () => {
       <Card className="p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-medium">Template Sections</h3>
-          <Button onClick={() => setTemplate(addSection(template))}>
+          <Button onClick={() => {
+            console.log("Adding new section");
+            setTemplate(addSection(template));
+          }}>
             <Plus className="mr-2 h-4 w-4" />
             Add Section
           </Button>
