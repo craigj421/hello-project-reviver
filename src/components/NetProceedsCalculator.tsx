@@ -42,10 +42,17 @@ export const NetProceedsCalculator = () => {
   const calculateNetProceeds = () => {
     const calculatedCommission = (details.purchasePrice * details.commissionRate) / 100;
 
+    const titleInsuranceAmount = details.sellerPayingTitle ? details.ownersTitleInsurance : 0;
+    console.log("Title insurance calculation:", {
+      sellerPayingTitle: details.sellerPayingTitle,
+      ownersTitleInsurance: details.ownersTitleInsurance,
+      finalAmount: titleInsuranceAmount
+    });
+
     const totalClosingCosts = 
       details.taxesApprox +
       details.docStampsDeed +
-      details.ownersTitleInsurance +
+      titleInsuranceAmount +
       calculatedCommission +
       details.complianceAudit +
       details.serviceTech +
@@ -61,16 +68,18 @@ export const NetProceedsCalculator = () => {
     const totalMortgages = details.firstMortgage + details.secondMortgage;
     const netProceeds = details.purchasePrice - totalClosingCosts - totalMortgages;
 
-    toast({
-      title: "Calculation Complete",
-      description: `Estimated Net Proceeds: $${netProceeds.toLocaleString()}`,
-    });
-
     console.log("Net Proceeds Calculation:", {
       purchasePrice: details.purchasePrice,
       totalClosingCosts,
       totalMortgages,
       netProceeds,
+      titleInsuranceIncluded: details.sellerPayingTitle,
+      searchExamClosingFee: details.searchExamClosingFee
+    });
+
+    toast({
+      title: "Calculation Complete",
+      description: `Estimated Net Proceeds: $${netProceeds.toLocaleString()}`,
     });
   };
 

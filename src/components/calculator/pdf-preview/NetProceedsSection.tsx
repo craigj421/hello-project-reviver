@@ -15,10 +15,12 @@ interface NetProceedsSectionProps {
 
 export const NetProceedsSection = ({ details, selectedSections, formatCurrency }: NetProceedsSectionProps) => {
   const calculateTotalClosingCosts = () => {
+    const titleInsuranceAmount = details.sellerPayingTitle ? details.ownersTitleInsurance : 0;
+    
     const total = (
       details.taxesApprox +
       details.docStampsDeed +
-      details.ownersTitleInsurance +
+      titleInsuranceAmount +
       details.commission +
       details.complianceAudit +
       details.serviceTech +
@@ -35,7 +37,8 @@ export const NetProceedsSection = ({ details, selectedSections, formatCurrency }
     console.log("PDF Preview - Total Closing Costs Breakdown:", {
       taxesApprox: details.taxesApprox,
       docStampsDeed: details.docStampsDeed,
-      ownersTitleInsurance: details.ownersTitleInsurance,
+      ownersTitleInsurance: titleInsuranceAmount,
+      titleInsuranceIncluded: details.sellerPayingTitle,
       commission: details.commission,
       complianceAudit: details.complianceAudit,
       serviceTech: details.serviceTech,
