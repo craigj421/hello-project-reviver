@@ -2,7 +2,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { AgentInfoSection } from "./settings/AgentInfoSection";
-import { StateSection } from "./settings/StateSection";
 import { LogoSection } from "./settings/LogoSection";
 import { ToggleSection } from "./settings/ToggleSection";
 import { ApiSection } from "./settings/ApiSection";
@@ -32,13 +31,8 @@ export const Settings = () => {
           onSettingChange={(key: string, value: any) => updateSettings(key as keyof typeof settings, value)}
         />
 
-        <StateSection 
-          state={settings.state}
-          onStateChange={(value) => updateSettings("state", value)}
-        />
-
         <TitleInsuranceSection
-          rates={settings.titleInsuranceRates || []}
+          rates={settings.titleInsuranceRates}
           onRatesChange={(rates) => updateSettings("titleInsuranceRates", rates)}
         />
 

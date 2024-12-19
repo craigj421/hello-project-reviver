@@ -2,6 +2,12 @@ import { useState } from "react";
 
 const SETTINGS_STORAGE_KEY = 'agent_settings';
 
+export interface TitleRate {
+  minAmount: number;
+  maxAmount: number;
+  ratePerThousand: number;
+}
+
 export interface Settings {
   emailNotifications: boolean;
   darkMode: boolean;
@@ -9,10 +15,10 @@ export interface Settings {
   apiKey: string;
   agentName: string;
   commission: string;
-  state: string;
   logo: File | null;
   propertyTaxRate: string;
   searchExamClosingFee: string;
+  titleInsuranceRates: TitleRate[];
 }
 
 type SettingsKey = keyof Settings;
@@ -27,10 +33,10 @@ export const useSettings = () => {
       apiKey: "sk_test_123456789",
       agentName: "",
       commission: "",
-      state: "Florida",
       logo: null,
       propertyTaxRate: "",
       searchExamClosingFee: "",
+      titleInsuranceRates: [],
     };
   });
 
