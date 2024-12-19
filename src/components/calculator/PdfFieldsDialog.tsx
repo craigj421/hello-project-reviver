@@ -67,12 +67,12 @@ export const PdfFieldsDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[900px] h-[90vh]">
+      <DialogContent className="max-w-[900px] h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>PDF Preview</DialogTitle>
         </DialogHeader>
-        <div className="grid grid-cols-2 gap-4 p-4">
-          <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-4 p-4 flex-1 min-h-0">
+          <div className="space-y-4 overflow-y-auto">
             <h3 className="font-semibold">Select Sections to Include</h3>
             <div className="space-y-2">
               <div className="flex items-center space-x-2">
@@ -137,11 +137,13 @@ export const PdfFieldsDialog = ({
               </div>
             </div>
           </div>
-          <ScrollArea className="flex-1">
-            <PdfPreview details={details} selectedSections={selectedSections} />
+          <ScrollArea className="flex-1 border rounded-md">
+            <div className="p-4">
+              <PdfPreview details={details} selectedSections={selectedSections} />
+            </div>
           </ScrollArea>
         </div>
-        <DialogFooter>
+        <DialogFooter className="mt-4">
           <Button onClick={handleSubmit}>Generate PDF</Button>
         </DialogFooter>
       </DialogContent>
