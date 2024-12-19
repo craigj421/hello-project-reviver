@@ -1,11 +1,30 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { NetProceedsCalculator } from "@/components/NetProceedsCalculator";
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            Seller's Net Proceeds Calculator
+          </h1>
+          <p className="text-lg text-gray-600">
+            Calculate estimated proceeds from your property sale
+          </p>
+        </div>
+        
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle>Property Details</CardTitle>
+            <CardDescription>
+              Enter the property and transaction details below to calculate net proceeds
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <NetProceedsCalculator />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
