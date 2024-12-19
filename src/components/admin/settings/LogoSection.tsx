@@ -8,6 +8,8 @@ interface LogoSectionProps {
 }
 
 export const LogoSection = ({ logoPreview, onLogoChange }: LogoSectionProps) => {
+  console.log("LogoSection rendering with logoPreview:", logoPreview);
+  
   return (
     <div className="space-y-2">
       <Label>Company Logo</Label>
@@ -18,6 +20,8 @@ export const LogoSection = ({ logoPreview, onLogoChange }: LogoSectionProps) => 
               src={logoPreview} 
               alt="Logo preview" 
               className="max-w-[200px] max-h-[200px] object-contain"
+              onLoad={() => console.log("Logo image loaded successfully:", logoPreview)}
+              onError={(e) => console.error("Error loading logo image:", e)}
             />
           </div>
         ) : (
@@ -29,7 +33,10 @@ export const LogoSection = ({ logoPreview, onLogoChange }: LogoSectionProps) => 
           id="logo"
           type="file"
           accept="image/*"
-          onChange={onLogoChange}
+          onChange={(e) => {
+            console.log("File input change detected");
+            onLogoChange(e);
+          }}
           className="hidden"
         />
         <Label
