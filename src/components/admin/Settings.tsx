@@ -7,6 +7,7 @@ import { LogoSection } from "./settings/LogoSection";
 import { ToggleSection } from "./settings/ToggleSection";
 import { ApiSection } from "./settings/ApiSection";
 import { TaxSection } from "./settings/TaxSection";
+import { TitleInsuranceSection } from "./settings/TitleInsuranceSection";
 import { useSettings } from "@/hooks/useSettings";
 
 export const Settings = () => {
@@ -34,6 +35,11 @@ export const Settings = () => {
         <StateSection 
           state={settings.state}
           onStateChange={(value) => updateSettings("state", value)}
+        />
+
+        <TitleInsuranceSection
+          rates={settings.titleInsuranceRates || []}
+          onRatesChange={(rates) => updateSettings("titleInsuranceRates", rates)}
         />
 
         <TaxSection
