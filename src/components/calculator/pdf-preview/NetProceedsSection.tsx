@@ -14,29 +14,25 @@ interface NetProceedsSectionProps {
 
 export const NetProceedsSection = ({ details, selectedSections }: NetProceedsSectionProps) => {
   const calculateTotalClosingCosts = () => {
-    let total = 0;
-    
-    if (selectedSections.closingCosts) {
-      total += details.taxesApprox + details.docStampsDeed + details.ownersTitleInsurance;
-    }
-    
-    if (selectedSections.additionalFees) {
-      total += details.complianceAudit + details.serviceTech + details.termiteInspection;
-    }
-    
-    if (selectedSections.additionalServices) {
-      total += details.fhaVaFees + details.survey + details.hoa;
-    }
-    
-    if (selectedSections.otherCosts) {
-      total += details.homeWarranty + details.buyersClosingCost + details.repairs;
-    }
-    
-    return total;
+    // Always include all costs in calculation, regardless of visibility
+    return (
+      details.taxesApprox +
+      details.docStampsDeed +
+      details.ownersTitleInsurance +
+      details.complianceAudit +
+      details.serviceTech +
+      details.termiteInspection +
+      details.fhaVaFees +
+      details.survey +
+      details.hoa +
+      details.homeWarranty +
+      details.buyersClosingCost +
+      details.repairs
+    );
   };
 
   const calculateTotalMortgage = () => {
-    if (!selectedSections.mortgageInfo) return 0;
+    // Always include all mortgage values in calculation
     return details.firstMortgage + details.secondMortgage;
   };
 
