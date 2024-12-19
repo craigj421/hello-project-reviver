@@ -5,11 +5,11 @@ import { useAuth } from "@/contexts/AuthContext";
 const SETTINGS_STORAGE_KEY = 'agent_settings';
 
 export interface TitleRate {
+  minAmount: number;
+  maxAmount: number;
+  ratePerThousand: number;
   id?: string;
   settings_id?: string;
-  min_amount: number;
-  max_amount: number;
-  rate_per_thousand: number;
 }
 
 export interface Settings {
@@ -59,7 +59,8 @@ export const useSettings = () => {
       const { data: settingsData, error: settingsError } = await supabase
         .from('settings')
         .select('*, title_insurance_rates(*)')
-        .single();
+        .eq('user_id', user?.id)
+        .maybeSingle();
 
       if (settingsError) {
         console.error("Error fetching settings:", settingsError);
@@ -68,6 +69,14 @@ export const useSettings = () => {
 
       if (settingsData) {
         console.log("Retrieved settings:", settingsData);
+        const transformedRates = settingsData.title_insurance_rates?.map((rate: any) => ({
+          minAmount: rate.min_amount,
+          maxAmount: rate.max_amount,
+          ratePerThousand: rate.rate_per_thousand,
+          id: rate.id,
+          settings_id: rate.settings_id
+        })) || [];
+
         setSettings({
           id: settingsData.id,
           emailNotifications: settingsData.email_notifications || false,
@@ -80,7 +89,7 @@ export const useSettings = () => {
           logo_url: settingsData.logo_url,
           propertyTaxRate: settingsData.property_tax_rate || "",
           searchExamClosingFee: settingsData.search_exam_closing_fee || "",
-          titleInsuranceRates: settingsData.title_insurance_rates || [],
+          titleInsuranceRates: transformedRates,
         });
 
         if (settingsData.logo_url) {
@@ -127,6 +136,7 @@ export const useSettings = () => {
       localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(updatedSettings));
     } catch (error) {
       console.error("Error in updateSettings:", error);
+      throw error;
     }
   };
 
@@ -139,11 +149,14 @@ export const useSettings = () => {
         const fileName = `${Math.random()}.${fileExt}`;
         const filePath = `${user?.id}/${fileName}`;
 
+        console.log("Uploading logo to path:", filePath);
+
         const { error: uploadError, data } = await supabase.storage
           .from('logos')
           .upload(filePath, file);
 
         if (uploadError) {
+          console.error("Error uploading logo:", uploadError);
           throw uploadError;
         }
 
@@ -153,6 +166,7 @@ export const useSettings = () => {
             .getPublicUrl(filePath);
 
           const publicUrl = urlData.publicUrl;
+          console.log("Logo uploaded successfully, public URL:", publicUrl);
 
           // Update settings with new logo URL
           await updateSettings('logo_url', publicUrl);
@@ -160,6 +174,7 @@ export const useSettings = () => {
         }
       } catch (error) {
         console.error("Error uploading logo:", error);
+        throw error;
       }
     }
   };

@@ -8,6 +8,8 @@ interface TitleRate {
   minAmount: number;
   maxAmount: number;
   ratePerThousand: number;
+  id?: string;
+  settings_id?: string;
 }
 
 interface TitleInsuranceSectionProps {
