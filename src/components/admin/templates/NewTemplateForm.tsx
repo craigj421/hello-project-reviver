@@ -5,16 +5,27 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const NewTemplateForm = () => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to create templates",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!name) {
       toast({
         title: "Error",
@@ -26,13 +37,12 @@ export const NewTemplateForm = () => {
 
     const { error } = await supabase
       .from('document_templates')
-      .insert([
-        {
-          name,
-          description,
-          template_data: {},
-        }
-      ]);
+      .insert({
+        name,
+        description,
+        template_data: {},
+        user_id: user.id,
+      });
 
     if (error) {
       console.error('Error creating template:', error);
