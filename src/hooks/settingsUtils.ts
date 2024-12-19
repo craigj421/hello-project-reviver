@@ -9,11 +9,14 @@ export const fetchUserSettings = async (userId: string | undefined) => {
 
   console.log("Fetching settings for user:", userId);
 
+  // Get the most recent settings entry for the user
   const { data: settingsData, error: settingsError } = await supabase
     .from('settings')
     .select('*, title_insurance_rates(*)')
     .eq('user_id', userId)
-    .single(); // Use single() to ensure we get exactly one row
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
   if (settingsError) {
     console.error("Error fetching settings:", settingsError);
