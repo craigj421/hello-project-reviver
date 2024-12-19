@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { Card } from "@/components/ui/card";
 
 interface PropertyDetails {
   sellerName: string;
@@ -105,70 +106,241 @@ export const NetProceedsCalculator = () => {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Basic Information */}
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="sellerName">Seller Name</Label>
-            <Input
-              id="sellerName"
-              value={details.sellerName}
-              onChange={(e) => handleInputChange("sellerName", e.target.value)}
-              placeholder="Enter seller's name"
-            />
+        <Card className="p-4">
+          <h3 className="text-lg font-semibold mb-4">Property Information</h3>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="sellerName">Seller Name</Label>
+              <Input
+                id="sellerName"
+                value={details.sellerName}
+                onChange={(e) => handleInputChange("sellerName", e.target.value)}
+                placeholder="Enter seller's name"
+              />
+            </div>
+            <div>
+              <Label htmlFor="propertyAddress">Property Address</Label>
+              <Input
+                id="propertyAddress"
+                value={details.propertyAddress}
+                onChange={(e) => handleInputChange("propertyAddress", e.target.value)}
+                placeholder="Enter property address"
+              />
+            </div>
+            <div>
+              <Label htmlFor="purchasePrice">Purchase Price ($)</Label>
+              <Input
+                id="purchasePrice"
+                type="number"
+                value={details.purchasePrice || ""}
+                onChange={(e) => handleInputChange("purchasePrice", parseFloat(e.target.value) || 0)}
+                placeholder="Enter purchase price"
+              />
+            </div>
           </div>
-          <div>
-            <Label htmlFor="propertyAddress">Property Address</Label>
-            <Input
-              id="propertyAddress"
-              value={details.propertyAddress}
-              onChange={(e) => handleInputChange("propertyAddress", e.target.value)}
-              placeholder="Enter property address"
-            />
-          </div>
-          <div>
-            <Label htmlFor="purchasePrice">Purchase Price ($)</Label>
-            <Input
-              id="purchasePrice"
-              type="number"
-              value={details.purchasePrice || ""}
-              onChange={(e) => handleInputChange("purchasePrice", parseFloat(e.target.value) || 0)}
-              placeholder="Enter purchase price"
-            />
-          </div>
-        </div>
+        </Card>
 
-        {/* Fees and Costs */}
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="commissionRate">Commission Rate (%)</Label>
-            <Input
-              id="commissionRate"
-              type="number"
-              value={details.commissionRate || ""}
-              onChange={(e) => handleInputChange("commissionRate", parseFloat(e.target.value) || 0)}
-              placeholder="Enter commission rate"
-            />
+        {/* Commission Information */}
+        <Card className="p-4">
+          <h3 className="text-lg font-semibold mb-4">Commission Details</h3>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="commissionRate">Commission Rate (%)</Label>
+              <Input
+                id="commissionRate"
+                type="number"
+                value={details.commissionRate || ""}
+                onChange={(e) => handleInputChange("commissionRate", parseFloat(e.target.value) || 0)}
+                placeholder="Enter commission rate"
+              />
+            </div>
+            <div>
+              <Label htmlFor="commission">Commission Amount ($)</Label>
+              <Input
+                id="commission"
+                type="number"
+                value={details.commission || ""}
+                onChange={(e) => handleInputChange("commission", parseFloat(e.target.value) || 0)}
+                placeholder="Enter commission amount"
+              />
+            </div>
           </div>
-          <div>
-            <Label htmlFor="firstMortgage">First Mortgage ($)</Label>
-            <Input
-              id="firstMortgage"
-              type="number"
-              value={details.firstMortgage || ""}
-              onChange={(e) => handleInputChange("firstMortgage", parseFloat(e.target.value) || 0)}
-              placeholder="Enter first mortgage amount"
-            />
+        </Card>
+
+        {/* Closing Costs */}
+        <Card className="p-4">
+          <h3 className="text-lg font-semibold mb-4">Closing Costs</h3>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="taxesApprox">Taxes (Approximate)</Label>
+              <Input
+                id="taxesApprox"
+                type="number"
+                value={details.taxesApprox || ""}
+                onChange={(e) => handleInputChange("taxesApprox", parseFloat(e.target.value) || 0)}
+                placeholder="Enter approximate taxes"
+              />
+            </div>
+            <div>
+              <Label htmlFor="docStampsDeed">Doc Stamps Deed</Label>
+              <Input
+                id="docStampsDeed"
+                type="number"
+                value={details.docStampsDeed || ""}
+                onChange={(e) => handleInputChange("docStampsDeed", parseFloat(e.target.value) || 0)}
+                placeholder="Enter doc stamps deed"
+              />
+            </div>
+            <div>
+              <Label htmlFor="ownersTitleInsurance">Owner's Title Insurance</Label>
+              <Input
+                id="ownersTitleInsurance"
+                type="number"
+                value={details.ownersTitleInsurance || ""}
+                onChange={(e) => handleInputChange("ownersTitleInsurance", parseFloat(e.target.value) || 0)}
+                placeholder="Enter owner's title insurance"
+              />
+            </div>
           </div>
-          <div>
-            <Label htmlFor="secondMortgage">Second Mortgage ($)</Label>
-            <Input
-              id="secondMortgage"
-              type="number"
-              value={details.secondMortgage || ""}
-              onChange={(e) => handleInputChange("secondMortgage", parseFloat(e.target.value) || 0)}
-              placeholder="Enter second mortgage amount"
-            />
+        </Card>
+
+        {/* Additional Fees */}
+        <Card className="p-4">
+          <h3 className="text-lg font-semibold mb-4">Additional Fees</h3>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="complianceAudit">Compliance & Audit</Label>
+              <Input
+                id="complianceAudit"
+                type="number"
+                value={details.complianceAudit || ""}
+                onChange={(e) => handleInputChange("complianceAudit", parseFloat(e.target.value) || 0)}
+                placeholder="Enter compliance & audit fee"
+              />
+            </div>
+            <div>
+              <Label htmlFor="serviceTech">Service & Tech</Label>
+              <Input
+                id="serviceTech"
+                type="number"
+                value={details.serviceTech || ""}
+                onChange={(e) => handleInputChange("serviceTech", parseFloat(e.target.value) || 0)}
+                placeholder="Enter service & tech fee"
+              />
+            </div>
+            <div>
+              <Label htmlFor="termiteInspection">Termite Inspection</Label>
+              <Input
+                id="termiteInspection"
+                type="number"
+                value={details.termiteInspection || ""}
+                onChange={(e) => handleInputChange("termiteInspection", parseFloat(e.target.value) || 0)}
+                placeholder="Enter termite inspection fee"
+              />
+            </div>
           </div>
-        </div>
+        </Card>
+
+        {/* Additional Services */}
+        <Card className="p-4">
+          <h3 className="text-lg font-semibold mb-4">Additional Services</h3>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="fhaVaFees">FHA/VA Fees</Label>
+              <Input
+                id="fhaVaFees"
+                type="number"
+                value={details.fhaVaFees || ""}
+                onChange={(e) => handleInputChange("fhaVaFees", parseFloat(e.target.value) || 0)}
+                placeholder="Enter FHA/VA fees"
+              />
+            </div>
+            <div>
+              <Label htmlFor="survey">Survey</Label>
+              <Input
+                id="survey"
+                type="number"
+                value={details.survey || ""}
+                onChange={(e) => handleInputChange("survey", parseFloat(e.target.value) || 0)}
+                placeholder="Enter survey cost"
+              />
+            </div>
+            <div>
+              <Label htmlFor="hoa">HOA</Label>
+              <Input
+                id="hoa"
+                type="number"
+                value={details.hoa || ""}
+                onChange={(e) => handleInputChange("hoa", parseFloat(e.target.value) || 0)}
+                placeholder="Enter HOA fees"
+              />
+            </div>
+          </div>
+        </Card>
+
+        {/* Other Costs */}
+        <Card className="p-4">
+          <h3 className="text-lg font-semibold mb-4">Other Costs</h3>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="homeWarranty">Home Warranty</Label>
+              <Input
+                id="homeWarranty"
+                type="number"
+                value={details.homeWarranty || ""}
+                onChange={(e) => handleInputChange("homeWarranty", parseFloat(e.target.value) || 0)}
+                placeholder="Enter home warranty cost"
+              />
+            </div>
+            <div>
+              <Label htmlFor="buyersClosingCost">Buyer's Closing Cost</Label>
+              <Input
+                id="buyersClosingCost"
+                type="number"
+                value={details.buyersClosingCost || ""}
+                onChange={(e) => handleInputChange("buyersClosingCost", parseFloat(e.target.value) || 0)}
+                placeholder="Enter buyer's closing cost"
+              />
+            </div>
+            <div>
+              <Label htmlFor="repairs">Repairs</Label>
+              <Input
+                id="repairs"
+                type="number"
+                value={details.repairs || ""}
+                onChange={(e) => handleInputChange("repairs", parseFloat(e.target.value) || 0)}
+                placeholder="Enter repair costs"
+              />
+            </div>
+          </div>
+        </Card>
+
+        {/* Mortgage Information */}
+        <Card className="p-4">
+          <h3 className="text-lg font-semibold mb-4">Mortgage Information</h3>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="firstMortgage">First Mortgage ($)</Label>
+              <Input
+                id="firstMortgage"
+                type="number"
+                value={details.firstMortgage || ""}
+                onChange={(e) => handleInputChange("firstMortgage", parseFloat(e.target.value) || 0)}
+                placeholder="Enter first mortgage amount"
+              />
+            </div>
+            <div>
+              <Label htmlFor="secondMortgage">Second Mortgage ($)</Label>
+              <Input
+                id="secondMortgage"
+                type="number"
+                value={details.secondMortgage || ""}
+                onChange={(e) => handleInputChange("secondMortgage", parseFloat(e.target.value) || 0)}
+                placeholder="Enter second mortgage amount"
+              />
+            </div>
+          </div>
+        </Card>
       </div>
 
       <div className="flex justify-end mt-6">
