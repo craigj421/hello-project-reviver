@@ -10,19 +10,42 @@ import { TitleInsuranceSection } from "./settings/TitleInsuranceSection";
 import { useSettings } from "@/hooks/useSettings";
 import { useAuth } from "@/contexts/AuthContext";
 import { LogOut } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Settings = () => {
   const { toast } = useToast();
-  const { settings, updateSettings, handleLogoChange, logoPreview } = useSettings();
+  const { settings, updateSettings, handleLogoChange, logoPreview, loading } = useSettings();
   const { signOut } = useAuth();
 
-  const handleSave = () => {
-    console.log("Saving settings:", settings);
-    toast({
-      title: "Settings saved",
-      description: "Your settings have been saved successfully.",
-    });
+  const handleSave = async () => {
+    try {
+      await updateSettings(settings);
+      toast({
+        title: "Settings saved",
+        description: "Your settings have been saved successfully.",
+      });
+    } catch (error) {
+      console.error("Error saving settings:", error);
+      toast({
+        title: "Error",
+        description: "There was an error saving your settings.",
+        variant: "destructive",
+      });
+    }
   };
+
+  if (loading) {
+    return (
+      <Card className="p-6">
+        <h2 className="text-xl font-semibold mb-4">Settings</h2>
+        <div className="space-y-6">
+          <Skeleton className="h-[200px]" />
+          <Skeleton className="h-[150px]" />
+          <Skeleton className="h-[100px]" />
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card className="p-6">

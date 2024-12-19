@@ -9,7 +9,124 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      settings: {
+        Row: {
+          agent_name: string | null
+          api_key: string | null
+          commission: string | null
+          created_at: string
+          dark_mode: boolean | null
+          email_notifications: boolean | null
+          id: string
+          logo_url: string | null
+          maintenance_mode: boolean | null
+          property_tax_rate: string | null
+          search_exam_closing_fee: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          agent_name?: string | null
+          api_key?: string | null
+          commission?: string | null
+          created_at?: string
+          dark_mode?: boolean | null
+          email_notifications?: boolean | null
+          id?: string
+          logo_url?: string | null
+          maintenance_mode?: boolean | null
+          property_tax_rate?: string | null
+          search_exam_closing_fee?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          agent_name?: string | null
+          api_key?: string | null
+          commission?: string | null
+          created_at?: string
+          dark_mode?: boolean | null
+          email_notifications?: boolean | null
+          id?: string
+          logo_url?: string | null
+          maintenance_mode?: boolean | null
+          property_tax_rate?: string | null
+          search_exam_closing_fee?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "settings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      title_insurance_rates: {
+        Row: {
+          created_at: string
+          id: string
+          max_amount: number
+          min_amount: number
+          rate_per_thousand: number
+          settings_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          max_amount: number
+          min_amount: number
+          rate_per_thousand: number
+          settings_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          max_amount?: number
+          min_amount?: number
+          rate_per_thousand?: number
+          settings_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "title_insurance_rates_settings_id_fkey"
+            columns: ["settings_id"]
+            isOneToOne: false
+            referencedRelation: "settings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
