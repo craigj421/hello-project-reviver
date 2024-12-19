@@ -11,28 +11,8 @@ import { Card } from "@/components/ui/card";
 import { FileText, Save, Plus, GripVertical } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-interface Template {
-  id: string;
-  name: string;
-  description: string;
-  sections: Section[];
-  template_data: any;
-}
-
-interface Section {
-  id: string;
-  name: string;
-  fields: Field[];
-}
-
-interface Field {
-  id: string;
-  name: string;
-  type: "text" | "number" | "date" | "select";
-  required: boolean;
-  options?: string[];
-}
+import { Template, Section, Field, TemplateData } from "@/types/template";
+import { Json } from "@/integrations/supabase/types";
 
 export const TemplateEditor = () => {
   const { id } = useParams();
@@ -60,7 +40,7 @@ export const TemplateEditor = () => {
   });
 
   const updateTemplateMutation = useMutation({
-    mutationFn: async (updatedTemplate: Partial<Template>) => {
+    mutationFn: async (updatedTemplate: Partial<TemplateData>) => {
       const { error } = await supabase
         .from('document_templates')
         .update(updatedTemplate)
@@ -87,9 +67,10 @@ export const TemplateEditor = () => {
 
   useEffect(() => {
     if (templateData) {
+      const parsedSections = templateData.sections as Section[] || [];
       setTemplate({
         ...templateData,
-        sections: templateData.sections || [],
+        sections: parsedSections,
       });
     }
   }, [templateData]);
@@ -97,10 +78,14 @@ export const TemplateEditor = () => {
   const handleSave = async () => {
     if (!template) return;
 
-    updateTemplateMutation.mutate({
-      ...template,
-      sections: template.sections,
-    });
+    const templateDataToUpdate: Partial<TemplateData> = {
+      name: template.name,
+      description: template.description,
+      sections: template.sections as unknown as Json,
+      template_data: template.template_data,
+    };
+
+    updateTemplateMutation.mutate(templateDataToUpdate);
   };
 
   const addSection = () => {
