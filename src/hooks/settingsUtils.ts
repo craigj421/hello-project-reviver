@@ -7,11 +7,13 @@ export const fetchUserSettings = async (userId: string | undefined) => {
     return null;
   }
 
+  console.log("Fetching settings for user:", userId);
+
   const { data: settingsData, error: settingsError } = await supabase
     .from('settings')
     .select('*, title_insurance_rates(*)')
     .eq('user_id', userId)
-    .maybeSingle();
+    .single(); // Use single() to ensure we get exactly one row
 
   if (settingsError) {
     console.error("Error fetching settings:", settingsError);
@@ -33,7 +35,6 @@ export const fetchUserSettings = async (userId: string | undefined) => {
       emailNotifications: settingsData.email_notifications || false,
       darkMode: settingsData.dark_mode || false,
       maintenanceMode: settingsData.maintenance_mode || false,
-      apiKey: settingsData.api_key || "",
       agentName: settingsData.agent_name || "",
       commission: settingsData.commission || "",
       logo: null,
@@ -57,7 +58,6 @@ export const updateUserSettings = async (userId: string, settings: Settings) => 
       email_notifications: settings.emailNotifications,
       dark_mode: settings.darkMode,
       maintenance_mode: settings.maintenanceMode,
-      api_key: settings.apiKey,
       agent_name: settings.agentName,
       commission: settings.commission,
       logo_url: settings.logo_url,

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Settings, TitleRate } from "./settingsTypes";
+import { Settings } from "./settingsTypes";
 import { fetchUserSettings, updateUserSettings, handleLogoUpload } from "./settingsUtils";
 
 export const useSettings = () => {
@@ -10,7 +9,6 @@ export const useSettings = () => {
     emailNotifications: false,
     darkMode: false,
     maintenanceMode: false,
-    apiKey: "",
     agentName: "",
     commission: "",
     logo: null,
