@@ -23,12 +23,20 @@ interface CustomFee {
 }
 
 export const calculateCustomFees = (purchasePrice: number, customFees: CustomFee[]) => {
-  return customFees.reduce((total, fee) => {
+  const totalCustomFees = customFees.reduce((total, fee) => {
     const feeAmount = fee.is_percentage ? 
       (purchasePrice * fee.amount) / 100 : 
       fee.amount;
+    console.log(`Calculating custom fee ${fee.name}:`, {
+      isPercentage: fee.is_percentage,
+      amount: fee.amount,
+      calculatedAmount: feeAmount
+    });
     return total + feeAmount;
   }, 0);
+
+  console.log("Total custom fees calculated:", totalCustomFees);
+  return totalCustomFees;
 };
 
 export const calculateTotalClosingCosts = (details: {
@@ -66,7 +74,7 @@ export const calculateTotalClosingCosts = (details: {
     details.buyersClosingCost +
     details.repairs +
     details.searchExamClosingFee +
-    totalCustomFees;
+    totalCustomFees;  // Include custom fees in total
 
   console.log("Total Closing Costs Breakdown:", {
     taxesApprox: details.taxesApprox,
