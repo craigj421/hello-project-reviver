@@ -1,4 +1,8 @@
 import { PropertyDetails } from "../types";
+import { 
+  calculateTotalClosingCosts,
+  calculateNetProceeds
+} from "@/utils/netProceedsCalculations";
 
 interface NetProceedsSectionProps {
   details: PropertyDetails;
@@ -14,86 +18,27 @@ interface NetProceedsSectionProps {
 }
 
 export const NetProceedsSection = ({ details, selectedSections, formatCurrency }: NetProceedsSectionProps) => {
-  const calculateTotalClosingCosts = () => {
-    const titleInsuranceAmount = details.sellerPayingTitle ? details.ownersTitleInsurance : 0;
-    
-    const total = (
-      details.taxesApprox +
-      details.docStampsDeed +
-      titleInsuranceAmount +
-      details.commission +
-      details.complianceAudit +
-      details.serviceTech +
-      details.termiteInspection +
-      details.fhaVaFees +
-      details.survey +
-      details.hoa +
-      details.homeWarranty +
-      details.buyersClosingCost +
-      details.repairs +
-      details.searchExamClosingFee
-    );
-    
-    console.log("PDF Preview - Total Closing Costs Breakdown:", {
-      taxesApprox: details.taxesApprox,
-      docStampsDeed: details.docStampsDeed,
-      ownersTitleInsurance: titleInsuranceAmount,
-      titleInsuranceIncluded: details.sellerPayingTitle,
-      commission: details.commission,
-      complianceAudit: details.complianceAudit,
-      serviceTech: details.serviceTech,
-      termiteInspection: details.termiteInspection,
-      fhaVaFees: details.fhaVaFees,
-      survey: details.survey,
-      hoa: details.hoa,
-      homeWarranty: details.homeWarranty,
-      buyersClosingCost: details.buyersClosingCost,
-      repairs: details.repairs,
-      searchExamClosingFee: details.searchExamClosingFee,
-      total: total
-    });
-    
-    return total;
-  };
-
-  const calculateTotalMortgage = () => {
-    const total = details.firstMortgage + details.secondMortgage;
-    console.log("PDF Preview - Total Mortgage:", {
-      firstMortgage: details.firstMortgage,
-      secondMortgage: details.secondMortgage,
-      total: total
-    });
-    return total;
-  };
-
-  const calculateNetProceeds = () => {
-    const totalClosingCosts = calculateTotalClosingCosts();
-    const totalMortgage = calculateTotalMortgage();
-    const netProceeds = details.purchasePrice - totalClosingCosts - totalMortgage;
-    
-    console.log("PDF Preview - Net Proceeds Calculation:", {
-      purchasePrice: details.purchasePrice,
-      totalClosingCosts,
-      totalMortgage,
-      netProceeds
-    });
-    
-    return netProceeds;
-  };
+  const totalClosingCosts = calculateTotalClosingCosts(details);
+  const netProceeds = calculateNetProceeds(
+    details.purchasePrice,
+    totalClosingCosts,
+    details.firstMortgage,
+    details.secondMortgage
+  );
 
   return (
     <div className="mt-8 pt-4 border-t space-y-4">
       <div className="flex justify-between items-center text-base">
         <span className="font-medium">Total Closing Costs:</span>
-        <span>{formatCurrency(calculateTotalClosingCosts())}</span>
+        <span>{formatCurrency(totalClosingCosts)}</span>
       </div>
       <div className="flex justify-between items-center text-base">
         <span className="font-medium">Total Mortgage:</span>
-        <span>{formatCurrency(calculateTotalMortgage())}</span>
+        <span>{formatCurrency(details.firstMortgage + details.secondMortgage)}</span>
       </div>
       <div className="flex justify-between items-center text-xl font-bold pt-4 border-t">
         <span>Net Proceeds to Seller:</span>
-        <span>{formatCurrency(calculateNetProceeds())}</span>
+        <span>{formatCurrency(netProceeds)}</span>
       </div>
     </div>
   );

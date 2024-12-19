@@ -9,6 +9,11 @@ import { AdditionalServices } from "./calculator/AdditionalServices";
 import { OtherCosts } from "./calculator/OtherCosts";
 import { MortgageInformation } from "./calculator/MortgageInformation";
 import { PdfFieldsDialog } from "./calculator/PdfFieldsDialog";
+import { 
+  calculateCommission,
+  calculateTotalClosingCosts,
+  calculateNetProceeds
+} from "@/utils/netProceedsCalculations";
 import type { PropertyDetails } from "./calculator/types";
 
 export const NetProceedsCalculator = () => {
@@ -39,43 +44,16 @@ export const NetProceedsCalculator = () => {
 
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const calculateNetProceeds = () => {
-    const calculatedCommission = (details.purchasePrice * details.commissionRate) / 100;
-
-    const titleInsuranceAmount = details.sellerPayingTitle ? details.ownersTitleInsurance : 0;
-    console.log("Title insurance calculation:", {
-      sellerPayingTitle: details.sellerPayingTitle,
-      ownersTitleInsurance: details.ownersTitleInsurance,
-      finalAmount: titleInsuranceAmount
-    });
-
-    const totalClosingCosts = 
-      details.taxesApprox +
-      details.docStampsDeed +
-      titleInsuranceAmount +
-      calculatedCommission +
-      details.complianceAudit +
-      details.serviceTech +
-      details.termiteInspection +
-      details.fhaVaFees +
-      details.survey +
-      details.hoa +
-      details.homeWarranty +
-      details.buyersClosingCost +
-      details.repairs +
-      details.searchExamClosingFee;
-
-    const totalMortgages = details.firstMortgage + details.secondMortgage;
-    const netProceeds = details.purchasePrice - totalClosingCosts - totalMortgages;
-
-    console.log("Net Proceeds Calculation:", {
-      purchasePrice: details.purchasePrice,
+  const calculateResults = () => {
+    const calculatedCommission = calculateCommission(details.purchasePrice, details.commissionRate);
+    const detailsWithCommission = { ...details, commission: calculatedCommission };
+    const totalClosingCosts = calculateTotalClosingCosts(detailsWithCommission);
+    const netProceeds = calculateNetProceeds(
+      details.purchasePrice,
       totalClosingCosts,
-      totalMortgages,
-      netProceeds,
-      titleInsuranceIncluded: details.sellerPayingTitle,
-      searchExamClosingFee: details.searchExamClosingFee
-    });
+      details.firstMortgage,
+      details.secondMortgage
+    );
 
     toast({
       title: "Calculation Complete",
@@ -113,7 +91,7 @@ export const NetProceedsCalculator = () => {
       </div>
 
       <div className="flex justify-end gap-4 mt-6">
-        <Button onClick={calculateNetProceeds} variant="outline">
+        <Button onClick={calculateResults} variant="outline">
           Calculate Net Proceeds
         </Button>
         <Button onClick={() => setDialogOpen(true)}>
