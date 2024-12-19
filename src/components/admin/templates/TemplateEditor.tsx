@@ -4,15 +4,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { FileText, Save, Plus, GripVertical } from "lucide-react";
+import { Plus } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Template, Section, Field, TemplateData } from "@/types/template";
-import { Json } from "@/integrations/supabase/types";
+import { TemplateHeader } from "./editor/TemplateHeader";
+import { TemplateSection } from "./editor/TemplateSection";
 
 export const TemplateEditor = () => {
   const { id } = useParams();
@@ -67,10 +64,27 @@ export const TemplateEditor = () => {
 
   useEffect(() => {
     if (templateData) {
-      const parsedSections = templateData.sections as Section[] || [];
+      // Ensure sections is properly typed when parsing from JSON
+      const parsedSections = Array.isArray(templateData.sections) 
+        ? templateData.sections.map(section => ({
+            id: section.id || crypto.randomUUID(),
+            name: section.name || '',
+            fields: Array.isArray(section.fields) 
+              ? section.fields.map(field => ({
+                  id: field.id || crypto.randomUUID(),
+                  name: field.name || '',
+                  type: field.type || 'text',
+                  required: field.required || false,
+                  options: field.options || []
+                }))
+              : []
+          }))
+        : [];
+
       setTemplate({
         ...templateData,
         sections: parsedSections,
+        description: templateData.description || '',
       });
     }
   }, [templateData]);
@@ -81,7 +95,7 @@ export const TemplateEditor = () => {
     const templateDataToUpdate: Partial<TemplateData> = {
       name: template.name,
       description: template.description,
-      sections: template.sections as unknown as Json,
+      sections: template.sections,
       template_data: template.template_data,
     };
 
@@ -100,6 +114,28 @@ export const TemplateEditor = () => {
     setTemplate({
       ...template,
       sections: [...template.sections, newSection]
+    });
+  };
+
+  const updateSection = (sectionId: string, updates: Partial<Section>) => {
+    if (!template) return;
+    
+    setTemplate({
+      ...template,
+      sections: template.sections.map(section =>
+        section.id === sectionId
+          ? { ...section, ...updates }
+          : section
+      )
+    });
+  };
+
+  const deleteSection = (sectionId: string) => {
+    if (!template) return;
+    
+    setTemplate({
+      ...template,
+      sections: template.sections.filter(s => s.id !== sectionId)
     });
   };
 
@@ -123,19 +159,6 @@ export const TemplateEditor = () => {
     });
   };
 
-  const handleDragEnd = (result: any) => {
-    if (!result.destination || !template) return;
-
-    const sections = Array.from(template.sections);
-    const [reorderedSection] = sections.splice(result.source.index, 1);
-    sections.splice(result.destination.index, 0, reorderedSection);
-
-    setTemplate({
-      ...template,
-      sections
-    });
-  };
-
   const updateField = (sectionId: string, fieldId: string, updates: Partial<Field>) => {
     if (!template) return;
     
@@ -156,6 +179,35 @@ export const TemplateEditor = () => {
     });
   };
 
+  const deleteField = (sectionId: string, fieldId: string) => {
+    if (!template) return;
+    
+    setTemplate({
+      ...template,
+      sections: template.sections.map(section =>
+        section.id === sectionId
+          ? {
+              ...section,
+              fields: section.fields.filter(f => f.id !== fieldId)
+            }
+          : section
+      )
+    });
+  };
+
+  const handleDragEnd = (result: any) => {
+    if (!result.destination || !template) return;
+
+    const sections = Array.from(template.sections);
+    const [reorderedSection] = sections.splice(result.source.index, 1);
+    sections.splice(result.destination.index, 0, reorderedSection);
+
+    setTemplate({
+      ...template,
+      sections
+    });
+  };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -167,36 +219,11 @@ export const TemplateEditor = () => {
   return (
     <div className="space-y-6">
       <Card className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            <h2 className="text-xl font-semibold">Edit Template</h2>
-          </div>
-          <Button onClick={handleSave}>
-            <Save className="mr-2 h-4 w-4" />
-            Save Changes
-          </Button>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="name">Template Name</Label>
-            <Input
-              id="name"
-              value={template.name}
-              onChange={(e) => setTemplate({ ...template, name: e.target.value })}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={template.description}
-              onChange={(e) => setTemplate({ ...template, description: e.target.value })}
-            />
-          </div>
-        </div>
+        <TemplateHeader
+          template={template}
+          onTemplateChange={(updates) => setTemplate({ ...template, ...updates })}
+          onSave={handleSave}
+        />
       </Card>
 
       <Card className="p-6">
@@ -226,90 +253,16 @@ export const TemplateEditor = () => {
                       <Card
                         ref={provided.innerRef}
                         {...provided.draggableProps}
-                        className="p-4"
                       >
-                        <div className="flex items-center gap-4 mb-4">
-                          <div {...provided.dragHandleProps}>
-                            <GripVertical className="h-5 w-5 text-gray-400" />
-                          </div>
-                          <Input
-                            value={section.name}
-                            onChange={(e) => {
-                              const newSections = [...template.sections];
-                              newSections[index] = {
-                                ...section,
-                                name: e.target.value
-                              };
-                              setTemplate({
-                                ...template,
-                                sections: newSections
-                              });
-                            }}
-                          />
-                          <Button
-                            variant="outline"
-                            onClick={() => addField(section.id)}
-                          >
-                            Add Field
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            onClick={() => {
-                              setTemplate({
-                                ...template,
-                                sections: template.sections.filter(s => s.id !== section.id)
-                              });
-                            }}
-                          >
-                            Delete
-                          </Button>
-                        </div>
-
-                        <div className="space-y-4 pl-9">
-                          {section.fields.map((field) => (
-                            <div key={field.id} className="flex items-center gap-4">
-                              <Input
-                                value={field.name}
-                                onChange={(e) => updateField(section.id, field.id, { name: e.target.value })}
-                                placeholder="Field name"
-                              />
-                              <Select
-                                value={field.type}
-                                onValueChange={(value: "text" | "number" | "date" | "select") => 
-                                  updateField(section.id, field.id, { type: value })
-                                }
-                              >
-                                <SelectTrigger className="w-[180px]">
-                                  <SelectValue placeholder="Field type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="text">Text</SelectItem>
-                                  <SelectItem value="number">Number</SelectItem>
-                                  <SelectItem value="date">Date</SelectItem>
-                                  <SelectItem value="select">Select</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <Button
-                                variant="destructive"
-                                onClick={() => {
-                                  setTemplate({
-                                    ...template,
-                                    sections: template.sections.map(s =>
-                                      s.id === section.id
-                                        ? {
-                                            ...s,
-                                            fields: s.fields.filter(f => f.id !== field.id)
-                                          }
-                                        : s
-                                    )
-                                  });
-                                }}
-                              >
-                                Delete
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
+                        <TemplateSection
+                          section={section}
+                          dragHandleProps={provided.dragHandleProps}
+                          onUpdate={(updates) => updateSection(section.id, updates)}
+                          onDelete={() => deleteSection(section.id)}
+                          onAddField={() => addField(section.id)}
+                          onUpdateField={(fieldId, updates) => updateField(section.id, fieldId, updates)}
+                          onDeleteField={(fieldId) => deleteField(section.id, fieldId)}
+                        />
                       </Card>
                     )}
                   </Draggable>
