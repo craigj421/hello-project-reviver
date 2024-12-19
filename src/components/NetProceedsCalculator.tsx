@@ -4,6 +4,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { PropertyInformation } from "./calculator/PropertyInformation";
 import { CommissionDetails } from "./calculator/CommissionDetails";
 import { ClosingCosts } from "./calculator/ClosingCosts";
+import { PdfFieldsDialog } from "./calculator/PdfFieldsDialog";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -34,6 +35,8 @@ export const NetProceedsCalculator = () => {
     firstMortgage: 0,
     secondMortgage: 0,
   });
+
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const calculateNetProceeds = () => {
     // Calculate commission based on rate
@@ -82,6 +85,16 @@ export const NetProceedsCalculator = () => {
     }));
   };
 
+  const handlePdfFieldsSubmit = (selectedFields: Array<keyof PropertyDetails>) => {
+    console.log("Selected fields for PDF:", selectedFields);
+    console.log("Details to include:", selectedFields.map(field => ({ [field]: details[field] })));
+    
+    toast({
+      title: "PDF Generation Started",
+      description: `Generating PDF with ${selectedFields.length} selected fields.`,
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -89,7 +102,6 @@ export const NetProceedsCalculator = () => {
         <CommissionDetails details={details} onInputChange={handleInputChange} />
         <ClosingCosts details={details} onInputChange={handleInputChange} />
         
-        {/* Additional Fees */}
         <Card className="p-4">
           <h3 className="text-lg font-semibold mb-4">Additional Fees</h3>
           <div className="space-y-4">
@@ -228,11 +240,21 @@ export const NetProceedsCalculator = () => {
         </Card>
       </div>
 
-      <div className="flex justify-end mt-6">
-        <Button onClick={calculateNetProceeds} className="w-full md:w-auto">
+      <div className="flex justify-end gap-4 mt-6">
+        <Button onClick={calculateNetProceeds} variant="outline">
           Calculate Net Proceeds
         </Button>
+        <Button onClick={() => setDialogOpen(true)}>
+          Generate PDF Report
+        </Button>
       </div>
+
+      <PdfFieldsDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        details={details}
+        onSubmit={handlePdfFieldsSubmit}
+      />
     </div>
   );
 };
