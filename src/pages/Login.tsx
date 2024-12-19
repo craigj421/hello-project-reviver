@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -20,25 +20,33 @@ const Login = () => {
     setLoading(true);
     
     try {
-      console.log("Attempting login with email:", email);
+      console.log("Starting login process for email:", email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      console.log("Login response:", { data, error });
+      console.log("Login response:", { 
+        success: !!data.user,
+        userId: data.user?.id,
+        error: error?.message 
+      });
 
       if (error) {
-        console.error("Login error:", error);
+        console.error("Login error details:", error);
         throw error;
       }
 
       if (data.user) {
-        console.log("Login successful for user:", data.user.id);
+        console.log("Login successful, user ID:", data.user.id);
+        console.log("Session data:", data.session);
+        
         toast({
           title: "Login successful",
           description: "Welcome back!",
         });
+        
+        console.log("Navigating to home page");
         navigate("/");
       }
     } catch (error: any) {
