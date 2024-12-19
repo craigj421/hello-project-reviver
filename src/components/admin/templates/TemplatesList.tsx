@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Star, Trash2, FileEdit } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Template {
   id: string;
@@ -17,10 +18,12 @@ interface Template {
 export const TemplatesList = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   const { data: templates, refetch } = useQuery({
     queryKey: ['templates'],
     queryFn: async () => {
+      console.log("Fetching templates for user:", user?.id);
       const { data, error } = await supabase
         .from('document_templates')
         .select('*')
@@ -36,14 +39,17 @@ export const TemplatesList = () => {
         return [];
       }
       
+      console.log("Templates fetched successfully:", data);
       return data as Template[];
     },
   });
 
   const handleDelete = async (id: string) => {
+    console.log("Attempting to delete template:", id);
     const template = templates?.find(t => t.id === id);
     
     if (template?.is_default) {
+      console.log("Prevented deletion of default template:", id);
       toast({
         title: "Cannot Delete",
         description: "Default templates cannot be deleted",
@@ -67,6 +73,7 @@ export const TemplatesList = () => {
       return;
     }
     
+    console.log("Template deleted successfully:", id);
     toast({
       title: "Success",
       description: "Template deleted successfully",
@@ -75,6 +82,7 @@ export const TemplatesList = () => {
   };
 
   const setAsDefault = async (id: string) => {
+    console.log("Attempting to set template as default:", id);
     // First, remove default status from all templates
     const { error: updateError } = await supabase
       .from('document_templates')
@@ -102,6 +110,7 @@ export const TemplatesList = () => {
       return;
     }
     
+    console.log("Template set as default successfully:", id);
     toast({
       title: "Success",
       description: "Default template updated successfully",
