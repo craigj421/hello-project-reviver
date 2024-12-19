@@ -6,7 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 import { Upload } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
+// Move US_STATES to a separate constant file if it grows
 const US_STATES = [
   "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", 
   "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", 
@@ -18,16 +20,23 @@ const US_STATES = [
   "Wisconsin", "Wyoming"
 ];
 
+// Create a localStorage key for settings
+const SETTINGS_STORAGE_KEY = 'agent_settings';
+
 export const Settings = () => {
-  const [settings, setSettings] = useState({
-    emailNotifications: false,
-    darkMode: false,
-    maintenanceMode: false,
-    apiKey: "sk_test_123456789",
-    agentName: "",
-    commission: "",
-    state: "Florida",
-    logo: null as File | null,
+  const { toast } = useToast();
+  const [settings, setSettings] = useState(() => {
+    const savedSettings = localStorage.getItem(SETTINGS_STORAGE_KEY);
+    return savedSettings ? JSON.parse(savedSettings) : {
+      emailNotifications: false,
+      darkMode: false,
+      maintenanceMode: false,
+      apiKey: "sk_test_123456789",
+      agentName: "",
+      commission: "",
+      state: "Florida",
+      logo: null as File | null,
+    };
   });
 
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -53,7 +62,11 @@ export const Settings = () => {
 
   const handleSave = () => {
     console.log("Saving settings:", settings);
-    // Here you would typically save to your backend
+    localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+    toast({
+      title: "Settings saved",
+      description: "Your settings have been saved successfully.",
+    });
   };
 
   return (
@@ -85,7 +98,10 @@ export const Settings = () => {
           <Label htmlFor="state">State (for Title Insurance)</Label>
           <Select 
             value={settings.state} 
-            onValueChange={(value) => setSettings(prev => ({ ...prev, state: value }))}
+            onValueChange={(value) => {
+              console.log("State changed to:", value);
+              setSettings(prev => ({ ...prev, state: value }));
+            }}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select state" />

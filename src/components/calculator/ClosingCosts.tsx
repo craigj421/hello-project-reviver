@@ -14,7 +14,12 @@ interface ClosingCostsProps {
 export const ClosingCosts = ({ details, onInputChange }: ClosingCostsProps) => {
   useEffect(() => {
     if (details.purchasePrice > 0) {
-      const titleInsurance = calculateTitleInsurance(details.purchasePrice);
+      // Get the state from localStorage
+      const savedSettings = localStorage.getItem('agent_settings');
+      const settings = savedSettings ? JSON.parse(savedSettings) : { state: 'Florida' };
+      
+      console.log("Calculating title insurance for state:", settings.state);
+      const titleInsurance = calculateTitleInsurance(details.purchasePrice, settings.state);
       console.log("Updating title insurance amount:", titleInsurance);
       onInputChange("ownersTitleInsurance", titleInsurance);
     }
