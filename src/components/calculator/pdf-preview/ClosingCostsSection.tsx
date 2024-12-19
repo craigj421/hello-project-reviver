@@ -3,9 +3,10 @@ import { PropertyDetails } from "../types";
 interface ClosingCostsSectionProps {
   details: PropertyDetails;
   visible: boolean;
+  formatCurrency: (amount: number) => string;
 }
 
-export const ClosingCostsSection = ({ details, visible }: ClosingCostsSectionProps) => {
+export const ClosingCostsSection = ({ details, visible, formatCurrency }: ClosingCostsSectionProps) => {
   if (!visible) return null;
 
   return (
@@ -14,15 +15,15 @@ export const ClosingCostsSection = ({ details, visible }: ClosingCostsSectionPro
       <div className="space-y-1 pl-4">
         <div className="flex justify-between">
           <span>Doc Stamps on Deed:</span>
-          <span>${details.docStampsDeed.toLocaleString()}</span>
+          <span>{formatCurrency(details.docStampsDeed)}</span>
         </div>
         <div className="flex justify-between">
           <span>Owner's Title Insurance:</span>
-          <span>${details.ownersTitleInsurance.toLocaleString()}</span>
+          <span>{formatCurrency(details.ownersTitleInsurance)}</span>
         </div>
         <div className="flex justify-between">
           <span>Taxes Approx:</span>
-          <span>${details.taxesApprox.toLocaleString()}</span>
+          <span>{formatCurrency(details.taxesApprox)}</span>
         </div>
       </div>
     </div>

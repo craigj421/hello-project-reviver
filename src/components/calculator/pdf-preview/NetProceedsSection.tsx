@@ -10,11 +10,11 @@ interface NetProceedsSectionProps {
     additionalServices: boolean;
     otherCosts: boolean;
   };
+  formatCurrency: (amount: number) => string;
 }
 
-export const NetProceedsSection = ({ details, selectedSections }: NetProceedsSectionProps) => {
+export const NetProceedsSection = ({ details, selectedSections, formatCurrency }: NetProceedsSectionProps) => {
   const calculateTotalClosingCosts = () => {
-    // Always include all costs in calculation, regardless of visibility
     return (
       details.taxesApprox +
       details.docStampsDeed +
@@ -32,7 +32,6 @@ export const NetProceedsSection = ({ details, selectedSections }: NetProceedsSec
   };
 
   const calculateTotalMortgage = () => {
-    // Always include all mortgage values in calculation
     return details.firstMortgage + details.secondMortgage;
   };
 
@@ -43,7 +42,7 @@ export const NetProceedsSection = ({ details, selectedSections }: NetProceedsSec
   return (
     <div className="flex justify-between font-bold text-lg pt-4 border-t">
       <span>Net Proceeds to Seller:</span>
-      <span>${calculateNetProceeds().toLocaleString()}</span>
+      <span>{formatCurrency(calculateNetProceeds())}</span>
     </div>
   );
 };

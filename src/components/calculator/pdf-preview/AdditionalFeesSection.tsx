@@ -3,9 +3,10 @@ import { PropertyDetails } from "../types";
 interface AdditionalFeesSectionProps {
   details: PropertyDetails;
   visible: boolean;
+  formatCurrency: (amount: number) => string;
 }
 
-export const AdditionalFeesSection = ({ details, visible }: AdditionalFeesSectionProps) => {
+export const AdditionalFeesSection = ({ details, visible, formatCurrency }: AdditionalFeesSectionProps) => {
   if (!visible) return null;
 
   return (
@@ -14,15 +15,15 @@ export const AdditionalFeesSection = ({ details, visible }: AdditionalFeesSectio
       <div className="space-y-1 pl-4">
         <div className="flex justify-between">
           <span>Compliance & Audit:</span>
-          <span>${details.complianceAudit.toLocaleString()}</span>
+          <span>{formatCurrency(details.complianceAudit)}</span>
         </div>
         <div className="flex justify-between">
           <span>Service & Tech:</span>
-          <span>${details.serviceTech.toLocaleString()}</span>
+          <span>{formatCurrency(details.serviceTech)}</span>
         </div>
         <div className="flex justify-between">
           <span>Termite Inspection:</span>
-          <span>${details.termiteInspection.toLocaleString()}</span>
+          <span>{formatCurrency(details.termiteInspection)}</span>
         </div>
       </div>
     </div>
