@@ -4,6 +4,9 @@ import { useToast } from "@/components/ui/use-toast";
 import { PropertyInformation } from "./calculator/PropertyInformation";
 import { CommissionDetails } from "./calculator/CommissionDetails";
 import { ClosingCosts } from "./calculator/ClosingCosts";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import type { PropertyDetails } from "./calculator/types";
 
 export const NetProceedsCalculator = () => {
