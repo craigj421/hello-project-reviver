@@ -33,6 +33,7 @@ export const PdfFieldsDialog = ({
     additionalFees: true,
     additionalServices: true,
     otherCosts: true,
+    commissionInfo: true,
   });
 
   const handleSubmit = () => {
@@ -61,6 +62,10 @@ export const PdfFieldsDialog = ({
     if (selectedSections.otherCosts) {
       selectedFields.push("homeWarranty", "buyersClosingCost", "repairs");
     }
+
+    if (selectedSections.commissionInfo) {
+      selectedFields.push("commissionRate", "commission");
+    }
     
     onSubmit(selectedFields);
   };
@@ -84,6 +89,16 @@ export const PdfFieldsDialog = ({
                   }
                 />
                 <Label htmlFor="propertyInfo">Property Information</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="commissionInfo" 
+                  checked={selectedSections.commissionInfo}
+                  onCheckedChange={(checked) => 
+                    setSelectedSections(prev => ({...prev, commissionInfo: checked === true}))
+                  }
+                />
+                <Label htmlFor="commissionInfo">Commission Information</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox 

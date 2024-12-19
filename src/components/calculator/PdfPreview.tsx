@@ -17,6 +17,7 @@ interface PdfPreviewProps {
     additionalFees: boolean;
     additionalServices: boolean;
     otherCosts: boolean;
+    commissionInfo: boolean;
   };
 }
 

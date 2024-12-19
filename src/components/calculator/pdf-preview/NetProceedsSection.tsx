@@ -13,6 +13,7 @@ interface NetProceedsSectionProps {
     additionalFees: boolean;
     additionalServices: boolean;
     otherCosts: boolean;
+    commissionInfo: boolean;
   };
   formatCurrency: (amount: number) => string;
 }
@@ -28,14 +29,18 @@ export const NetProceedsSection = ({ details, selectedSections, formatCurrency }
 
   return (
     <div className="mt-8 pt-4 border-t space-y-4">
-      <div className="flex justify-between items-center text-base">
-        <span className="font-medium">Commission Rate:</span>
-        <span>{details.commissionRate}%</span>
-      </div>
-      <div className="flex justify-between items-center text-base">
-        <span className="font-medium">Total Commission:</span>
-        <span>{formatCurrency(details.commission)}</span>
-      </div>
+      {selectedSections.commissionInfo && (
+        <>
+          <div className="flex justify-between items-center text-base">
+            <span className="font-medium">Commission Rate:</span>
+            <span>{details.commissionRate}%</span>
+          </div>
+          <div className="flex justify-between items-center text-base">
+            <span className="font-medium">Total Commission:</span>
+            <span>{formatCurrency(details.commission)}</span>
+          </div>
+        </>
+      )}
       <div className="flex justify-between items-center text-base">
         <span className="font-medium">Total Closing Costs:</span>
         <span>{formatCurrency(totalClosingCosts)}</span>
