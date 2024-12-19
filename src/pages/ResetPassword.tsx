@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +13,29 @@ const ResetPassword = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    // Check if we have an access token in the URL
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const accessToken = hashParams.get("access_token");
+    
+    if (accessToken) {
+      console.log("Access token found in URL");
+      // Set the session with the access token
+      supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: "",
+      });
+    } else {
+      console.log("No access token found in URL");
+      toast({
+        title: "Error",
+        description: "Invalid or missing reset token",
+        variant: "destructive",
+      });
+      navigate("/login");
+    }
+  }, [navigate, toast]);
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,6 +64,7 @@ const ResetPassword = () => {
       
       navigate("/login");
     } catch (error: any) {
+      console.error("Error resetting password:", error);
       toast({
         title: "Error",
         description: error.message,
