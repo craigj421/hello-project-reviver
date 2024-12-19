@@ -1,6 +1,5 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { AgentInfoSection } from "./settings/AgentInfoSection";
 import { StateSection } from "./settings/StateSection";
@@ -16,7 +15,6 @@ export const Settings = () => {
 
   const handleSave = () => {
     console.log("Saving settings:", settings);
-    updateSettings(settings);
     toast({
       title: "Settings saved",
       description: "Your settings have been saved successfully.",
@@ -30,7 +28,7 @@ export const Settings = () => {
         <AgentInfoSection 
           agentName={settings.agentName}
           commission={settings.commission}
-          onSettingChange={updateSettings}
+          onSettingChange={(key: string, value: any) => updateSettings(key as keyof typeof settings, value)}
         />
 
         <StateSection 
@@ -40,7 +38,7 @@ export const Settings = () => {
 
         <TaxSection
           propertyTaxRate={settings.propertyTaxRate}
-          onSettingChange={updateSettings}
+          onSettingChange={(key: string, value: any) => updateSettings(key as keyof typeof settings, value)}
         />
 
         <LogoSection 
@@ -50,7 +48,7 @@ export const Settings = () => {
 
         <ToggleSection 
           settings={settings}
-          onToggle={(key) => updateSettings(key, !settings[key])}
+          onToggle={(key) => updateSettings(key as keyof typeof settings, !settings[key as keyof typeof settings])}
         />
 
         <ApiSection 

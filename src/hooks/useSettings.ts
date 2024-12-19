@@ -2,7 +2,7 @@ import { useState } from "react";
 
 const SETTINGS_STORAGE_KEY = 'agent_settings';
 
-interface Settings {
+export interface Settings {
   emailNotifications: boolean;
   darkMode: boolean;
   maintenanceMode: boolean;
@@ -13,6 +13,8 @@ interface Settings {
   logo: File | null;
   propertyTaxRate: string;
 }
+
+type SettingsKey = keyof Settings;
 
 export const useSettings = () => {
   const [settings, setSettings] = useState<Settings>(() => {
@@ -32,16 +34,24 @@ export const useSettings = () => {
 
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
-  const updateSettings = (key: keyof Settings | Partial<Settings>, value?: any) => {
-    if (typeof key === 'object') {
+  const updateSettings = (keyOrPartial: SettingsKey | Partial<Settings>, value?: any) => {
+    if (typeof keyOrPartial === 'object') {
       setSettings(prev => ({
         ...prev,
-        ...key,
+        ...keyOrPartial,
+      }));
+      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify({
+        ...settings,
+        ...keyOrPartial,
       }));
     } else {
       setSettings(prev => ({
         ...prev,
-        [key]: value,
+        [keyOrPartial]: value,
+      }));
+      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify({
+        ...settings,
+        [keyOrPartial]: value,
       }));
     }
   };
