@@ -25,21 +25,24 @@ export const useSettings = () => {
 
   useEffect(() => {
     if (user) {
+      console.log("User detected, initiating settings fetch for user:", user.id);
       fetchSettings();
     }
   }, [user]);
 
   const fetchSettings = async () => {
     try {
-      console.log("Fetching settings for user:", user?.id);
+      console.log("Starting fetchSettings for user:", user?.id);
       const settingsData = await fetchUserSettings(user?.id);
       if (settingsData) {
-        console.log("Retrieved settings:", settingsData);
+        console.log("Retrieved settings with logo_url:", settingsData.logo_url);
         setSettings(settingsData);
         if (settingsData.logo_url) {
           console.log("Setting logo preview from fetched settings:", settingsData.logo_url);
           setLogoPreview(settingsData.logo_url);
         }
+      } else {
+        console.log("No settings data retrieved");
       }
     } catch (error) {
       console.error("Error in fetchSettings:", error);
@@ -49,15 +52,20 @@ export const useSettings = () => {
   };
 
   const updateSettings = async (updates: Partial<Settings>) => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      console.log("No user ID available for settings update");
+      return;
+    }
     
     try {
       console.log("Updating settings with:", updates);
+      console.log("Current logo_url in updates:", updates.logo_url);
       const updatedSettings = { ...settings, ...updates };
+      console.log("New settings after update:", updatedSettings);
       setSettings(updatedSettings);
       
       await updateUserSettings(user.id, updatedSettings);
-      console.log("Settings updated successfully");
+      console.log("Settings updated successfully in database");
     } catch (error) {
       console.error("Error in updateSettings:", error);
       throw error;
@@ -68,15 +76,19 @@ export const useSettings = () => {
     const file = event.target.files?.[0];
     if (file && user?.id) {
       try {
-        console.log("Uploading new logo file:", file.name);
+        console.log("Starting logo upload for file:", file.name);
         const publicUrl = await handleLogoUpload(file, user.id);
-        console.log("Logo uploaded successfully, URL:", publicUrl);
+        console.log("Logo uploaded successfully, received URL:", publicUrl);
         setLogoPreview(publicUrl);
+        console.log("Logo preview state updated with URL:", publicUrl);
         await updateSettings({ logo_url: publicUrl });
+        console.log("Settings updated with new logo URL");
       } catch (error) {
         console.error("Error uploading logo:", error);
         throw error;
       }
+    } else {
+      console.log("No file selected or no user ID available");
     }
   };
 
