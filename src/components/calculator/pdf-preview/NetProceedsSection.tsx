@@ -40,9 +40,11 @@ export const NetProceedsSection = ({ details, selectedSections, formatCurrency }
   };
 
   return (
-    <div className="flex justify-between font-bold text-lg pt-4 border-t">
-      <span>Net Proceeds to Seller:</span>
-      <span>{formatCurrency(calculateNetProceeds())}</span>
+    <div className="mt-8 pt-4 border-t">
+      <div className="flex justify-between items-center text-xl font-bold">
+        <span>Net Proceeds to Seller:</span>
+        <span>{formatCurrency(calculateNetProceeds())}</span>
+      </div>
     </div>
   );
 };

@@ -10,18 +10,20 @@ export const MortgageSection = ({ details, visible, formatCurrency }: MortgageSe
   if (!visible) return null;
 
   return (
-    <div className="space-y-2">
-      <div className="flex justify-between">
-        <span>First Mortgage:</span>
-        <span>{formatCurrency(details.firstMortgage)}</span>
-      </div>
-      <div className="flex justify-between">
-        <span>Second Mortgage:</span>
-        <span>{formatCurrency(details.secondMortgage)}</span>
-      </div>
-      <div className="flex justify-between font-semibold pt-2 border-t">
-        <span>Outstanding Loan + Mortgage costs:</span>
-        <span>{formatCurrency(details.firstMortgage + details.secondMortgage)}</span>
+    <div className="space-y-2 border-b pb-4">
+      <div className="space-y-2">
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-gray-600">First Mortgage:</span>
+          <span className="font-medium">{formatCurrency(details.firstMortgage)}</span>
+        </div>
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-gray-600">Second Mortgage:</span>
+          <span className="font-medium">{formatCurrency(details.secondMortgage)}</span>
+        </div>
+        <div className="flex justify-between items-center pt-2 border-t text-sm font-semibold">
+          <span>Outstanding Loan + Mortgage costs:</span>
+          <span>{formatCurrency(details.firstMortgage + details.secondMortgage)}</span>
+        </div>
       </div>
     </div>
   );
