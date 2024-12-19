@@ -23,6 +23,9 @@ const Register = () => {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: 'https://preview--hello-project-reviver.lovable.app/login'
+        }
       });
 
       if (error) throw error;
