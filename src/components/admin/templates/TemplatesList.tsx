@@ -3,7 +3,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { Star, Trash2 } from "lucide-react";
+import { Star, Trash2, FileEdit } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface Template {
   id: string;
@@ -15,6 +16,7 @@ interface Template {
 
 export const TemplatesList = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const { data: templates, refetch } = useQuery({
     queryKey: ['templates'],
@@ -102,6 +104,14 @@ export const TemplatesList = () => {
               <TableCell>{template.description}</TableCell>
               <TableCell>{template.is_default ? "Yes" : "No"}</TableCell>
               <TableCell className="space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate(`/admin/templates/${template.id}`)}
+                >
+                  <FileEdit className="h-4 w-4 mr-1" />
+                  Edit
+                </Button>
                 {!template.is_default && (
                   <Button
                     variant="outline"
