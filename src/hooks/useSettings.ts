@@ -56,10 +56,16 @@ export const useSettings = () => {
   const fetchSettings = async () => {
     try {
       console.log("Fetching settings for user:", user?.id);
+      
+      if (!user?.id) {
+        console.error("No user ID available");
+        return;
+      }
+
       const { data: settingsData, error: settingsError } = await supabase
         .from('settings')
         .select('*, title_insurance_rates(*)')
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .maybeSingle();
 
       if (settingsError) {
@@ -95,6 +101,8 @@ export const useSettings = () => {
         if (settingsData.logo_url) {
           setLogoPreview(settingsData.logo_url);
         }
+      } else {
+        console.log("No settings found for user, using defaults");
       }
     } catch (error) {
       console.error("Error in fetchSettings:", error);
@@ -105,6 +113,11 @@ export const useSettings = () => {
 
   const updateSettings = async (keyOrPartial: SettingsKey | Partial<Settings>, value?: any) => {
     try {
+      if (!user?.id) {
+        console.error("No user ID available");
+        return;
+      }
+
       const updatedSettings = typeof keyOrPartial === 'object'
         ? { ...settings, ...keyOrPartial }
         : { ...settings, [keyOrPartial]: value };
@@ -114,7 +127,8 @@ export const useSettings = () => {
       // Save to Supabase
       const { error } = await supabase
         .from('settings')
-        .update({
+        .upsert({
+          user_id: user.id,
           email_notifications: updatedSettings.emailNotifications,
           dark_mode: updatedSettings.darkMode,
           maintenance_mode: updatedSettings.maintenanceMode,
@@ -125,7 +139,7 @@ export const useSettings = () => {
           property_tax_rate: updatedSettings.propertyTaxRate,
           search_exam_closing_fee: updatedSettings.searchExamClosingFee,
         })
-        .eq('id', settings.id);
+        .eq('user_id', user.id);
 
       if (error) {
         console.error("Error updating settings:", error);
@@ -142,12 +156,12 @@ export const useSettings = () => {
 
   const handleLogoChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
+    if (file && user?.id) {
       try {
         // Upload to Supabase Storage
         const fileExt = file.name.split('.').pop();
         const fileName = `${Math.random()}.${fileExt}`;
-        const filePath = `${user?.id}/${fileName}`;
+        const filePath = `${user.id}/${fileName}`;
 
         console.log("Uploading logo to path:", filePath);
 
