@@ -31,10 +31,13 @@ export const useSettings = () => {
 
   const fetchSettings = async () => {
     try {
+      console.log("Fetching settings for user:", user?.id);
       const settingsData = await fetchUserSettings(user?.id);
       if (settingsData) {
+        console.log("Retrieved settings:", settingsData);
         setSettings(settingsData);
         if (settingsData.logo_url) {
+          console.log("Setting logo preview from fetched settings:", settingsData.logo_url);
           setLogoPreview(settingsData.logo_url);
         }
       }
@@ -49,11 +52,12 @@ export const useSettings = () => {
     if (!user?.id) return;
     
     try {
+      console.log("Updating settings with:", updates);
       const updatedSettings = { ...settings, ...updates };
       setSettings(updatedSettings);
       
       await updateUserSettings(user.id, updatedSettings);
-      localStorage.setItem('agent_settings', JSON.stringify(updatedSettings));
+      console.log("Settings updated successfully");
     } catch (error) {
       console.error("Error in updateSettings:", error);
       throw error;
@@ -64,9 +68,11 @@ export const useSettings = () => {
     const file = event.target.files?.[0];
     if (file && user?.id) {
       try {
+        console.log("Uploading new logo file:", file.name);
         const publicUrl = await handleLogoUpload(file, user.id);
-        await updateSettings({ logo_url: publicUrl });
+        console.log("Logo uploaded successfully, URL:", publicUrl);
         setLogoPreview(publicUrl);
+        await updateSettings({ logo_url: publicUrl });
       } catch (error) {
         console.error("Error uploading logo:", error);
         throw error;

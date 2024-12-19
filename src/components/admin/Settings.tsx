@@ -19,9 +19,10 @@ export const Settings = () => {
 
   const handleSave = async () => {
     try {
+      console.log("Saving settings with logo URL:", logoPreview);
       const settingsToUpdate = {
         ...settings,
-        logo_url: logoPreview // Ensure logo_url is included in the update
+        logo_url: logoPreview || settings.logo_url // Use existing logo_url if no new preview
       };
       
       await updateSettings(settingsToUpdate);
@@ -75,7 +76,7 @@ export const Settings = () => {
         />
 
         <LogoSection 
-          logoPreview={logoPreview}
+          logoPreview={settings.logo_url || logoPreview}
           onLogoChange={handleLogoChange}
         />
 

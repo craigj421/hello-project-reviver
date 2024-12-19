@@ -37,7 +37,7 @@ export const fetchUserSettings = async (userId: string | undefined) => {
       agentName: settingsData.agent_name || "",
       commission: settingsData.commission || "",
       logo: null,
-      logo_url: settingsData.logo_url,
+      logo_url: settingsData.logo_url || "",
       propertyTaxRate: settingsData.property_tax_rate || "",
       searchExamClosingFee: settingsData.search_exam_closing_fee || "",
       titleInsuranceRates: transformedRates,
@@ -48,6 +48,8 @@ export const fetchUserSettings = async (userId: string | undefined) => {
 };
 
 export const updateUserSettings = async (userId: string, settings: Settings) => {
+  console.log("Updating settings for user:", userId, "with data:", settings);
+  
   const { error } = await supabase
     .from('settings')
     .upsert({
@@ -68,6 +70,8 @@ export const updateUserSettings = async (userId: string, settings: Settings) => 
     console.error("Error updating settings:", error);
     throw error;
   }
+  
+  console.log("Settings updated successfully in database");
 };
 
 export const handleLogoUpload = async (file: File, userId: string) => {
