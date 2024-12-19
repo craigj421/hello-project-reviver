@@ -7,6 +7,7 @@ import { ClosingCosts } from "./calculator/ClosingCosts";
 import { AdditionalFees } from "./calculator/AdditionalFees";
 import { AdditionalServices } from "./calculator/AdditionalServices";
 import { OtherCosts } from "./calculator/OtherCosts";
+import { CustomFeesSection } from "./calculator/CustomFeesSection";
 import { MortgageInformation } from "./calculator/MortgageInformation";
 import { PdfFieldsDialog } from "./calculator/PdfFieldsDialog";
 import { 
@@ -86,6 +87,7 @@ export const NetProceedsCalculator = () => {
         <ClosingCosts details={details} onInputChange={handleInputChange} />
         <AdditionalFees details={details} onInputChange={handleInputChange} />
         <AdditionalServices details={details} onInputChange={handleInputChange} />
+        <CustomFeesSection details={details} onInputChange={handleInputChange} />
         <OtherCosts details={details} onInputChange={handleInputChange} />
         <MortgageInformation details={details} onInputChange={handleInputChange} />
       </div>

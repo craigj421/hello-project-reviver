@@ -5,8 +5,16 @@ import { SellerSection } from "./pdf-preview/SellerSection";
 import { ClosingCostsSection } from "./pdf-preview/ClosingCostsSection";
 import { AdditionalFeesSection } from "./pdf-preview/AdditionalFeesSection";
 import { AdditionalServicesSection } from "./pdf-preview/AdditionalServicesSection";
+import { CustomFeesSection } from "./pdf-preview/CustomFeesSection";
 import { MortgageSection } from "./pdf-preview/MortgageSection";
 import { NetProceedsSection } from "./pdf-preview/NetProceedsSection";
+
+interface CustomFee {
+  id: string;
+  name: string;
+  amount: number;
+  is_percentage: boolean;
+}
 
 interface PdfPreviewProps {
   details: PropertyDetails;
@@ -16,12 +24,14 @@ interface PdfPreviewProps {
     mortgageInfo: boolean;
     additionalFees: boolean;
     additionalServices: boolean;
+    customFees: boolean;
     otherCosts: boolean;
     commissionInfo: boolean;
   };
+  customFees: CustomFee[];
 }
 
-export const PdfPreview = ({ details, selectedSections }: PdfPreviewProps) => {
+export const PdfPreview = ({ details, selectedSections, customFees }: PdfPreviewProps) => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -47,6 +57,12 @@ export const PdfPreview = ({ details, selectedSections }: PdfPreviewProps) => {
         <AdditionalServicesSection 
           details={details} 
           visible={selectedSections.additionalServices}
+          formatCurrency={formatCurrency}
+        />
+        <CustomFeesSection
+          details={details}
+          customFees={customFees}
+          visible={selectedSections.customFees}
           formatCurrency={formatCurrency}
         />
         <MortgageSection 

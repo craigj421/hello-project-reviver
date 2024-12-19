@@ -7,10 +7,18 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { supabase } from "@/integrations/supabase/client";
 import type { PropertyDetails } from "./types";
 import { PdfPreview } from "./PdfPreview";
 import { SectionSelector } from "./pdf-dialog/SectionSelector";
 import { PdfActions } from "./pdf-dialog/PdfActions";
+
+interface CustomFee {
+  id: string;
+  name: string;
+  amount: number;
+  is_percentage: boolean;
+}
 
 interface PdfFieldsDialogProps {
   open: boolean;
@@ -31,11 +39,34 @@ export const PdfFieldsDialog = ({
     mortgageInfo: true,
     additionalFees: true,
     additionalServices: true,
+    customFees: true,
     otherCosts: true,
     commissionInfo: true,
   });
 
+  const [customFees, setCustomFees] = React.useState<CustomFee[]>([]);
   const pdfRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const fetchCustomFees = async () => {
+      const { data, error } = await supabase
+        .from('custom_fees')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching custom fees:', error);
+        return;
+      }
+
+      console.log('Fetched custom fees for PDF:', data);
+      setCustomFees(data || []);
+    };
+
+    if (open) {
+      fetchCustomFees();
+    }
+  }, [open]);
 
   const handleSectionChange = (section: string, checked: boolean) => {
     setSelectedSections(prev => ({
@@ -87,7 +118,11 @@ export const PdfFieldsDialog = ({
           </div>
           <ScrollArea className="flex-1 border rounded-md">
             <div className="p-4" ref={pdfRef}>
-              <PdfPreview details={details} selectedSections={selectedSections} />
+              <PdfPreview 
+                details={details} 
+                selectedSections={selectedSections}
+                customFees={customFees}
+              />
             </div>
           </ScrollArea>
         </div>
