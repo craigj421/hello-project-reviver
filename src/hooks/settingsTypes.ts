@@ -11,7 +11,6 @@ export interface Settings {
   emailNotifications: boolean;
   darkMode: boolean;
   maintenanceMode: boolean;
-  apiKey: string;
   agentName: string;
   commission: string;
   logo: File | null;

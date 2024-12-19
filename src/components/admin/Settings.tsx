@@ -4,7 +4,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { AgentInfoSection } from "./settings/AgentInfoSection";
 import { LogoSection } from "./settings/LogoSection";
 import { ToggleSection } from "./settings/ToggleSection";
-import { ApiSection } from "./settings/ApiSection";
 import { TaxSection } from "./settings/TaxSection";
 import { TitleInsuranceSection } from "./settings/TitleInsuranceSection";
 import { useSettings } from "@/hooks/useSettings";
@@ -83,11 +82,6 @@ export const Settings = () => {
         <ToggleSection 
           settings={settings}
           onToggle={(key) => updateSettings({ [key]: !settings[key as keyof typeof settings] })}
-        />
-
-        <ApiSection 
-          apiKey={settings.apiKey}
-          onApiKeyChange={(value) => updateSettings({ apiKey: value })}
         />
 
         <Button onClick={handleSave} className="w-full">
