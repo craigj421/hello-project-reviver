@@ -25,6 +25,17 @@ export const ClosingCosts = ({ details, onInputChange }: ClosingCostsProps) => {
     }
   }, [details.purchasePrice, onInputChange]);
 
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('agent_settings');
+    if (savedSettings) {
+      const settings = JSON.parse(savedSettings);
+      if (settings.searchExamClosingFee) {
+        console.log("Setting default Search/Exam/Closing Fee:", settings.searchExamClosingFee);
+        onInputChange("searchExamClosingFee", parseFloat(settings.searchExamClosingFee));
+      }
+    }
+  }, [onInputChange]);
+
   return (
     <Card className="p-4">
       <h3 className="text-lg font-semibold mb-4">Closing Costs</h3>
@@ -58,6 +69,16 @@ export const ClosingCosts = ({ details, onInputChange }: ClosingCostsProps) => {
             readOnly
             className="bg-gray-100"
             placeholder="Automatically calculated"
+          />
+        </div>
+        <div>
+          <Label htmlFor="searchExamClosingFee">Search/Exam/Closing Fee</Label>
+          <Input
+            id="searchExamClosingFee"
+            type="number"
+            value={details.searchExamClosingFee || ""}
+            onChange={(e) => onInputChange("searchExamClosingFee", parseFloat(e.target.value) || 0)}
+            placeholder="Enter Search/Exam/Closing Fee"
           />
         </div>
         <div className="flex items-center space-x-2">
