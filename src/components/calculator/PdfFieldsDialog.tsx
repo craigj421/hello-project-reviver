@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import * as React from "react";
 import {
   Dialog,
   DialogContent,
@@ -25,7 +25,7 @@ export const PdfFieldsDialog = ({
   details,
   onSubmit,
 }: PdfFieldsDialogProps) => {
-  const [selectedFields, setSelectedFields] = useState<Array<keyof PropertyDetails>>([]);
+  const [selectedFields, setSelectedFields] = React.useState<Array<keyof PropertyDetails>>([]);
 
   const handleSubmit = () => {
     onSubmit(selectedFields);
