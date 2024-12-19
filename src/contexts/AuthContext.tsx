@@ -21,6 +21,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("Initial session check:", { 
+        sessionExists: !!session,
+        userId: session?.user?.id,
+        userEmail: session?.user?.email 
+      });
       setSession(session);
       setUser(session?.user ?? null);
     });
@@ -28,8 +33,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log("Auth state changed:", _event);
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      console.log("Auth state changed:", { 
+        event: _event, 
+        userId: session?.user?.id,
+        userEmail: session?.user?.email
+      });
+
+      // Check if profile exists
+      if (session?.user) {
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+
+        console.log("Profile check:", { 
+          profileExists: !!profile, 
+          profileError,
+          userId: session.user.id 
+        });
+      }
+
       setSession(session);
       setUser(session?.user ?? null);
     });
@@ -39,6 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
+      console.log("Attempting to sign out");
       await supabase.auth.signOut();
       navigate("/login");
       toast({
