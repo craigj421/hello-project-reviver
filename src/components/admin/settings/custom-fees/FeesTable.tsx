@@ -1,13 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-
-interface CustomFee {
-  id: string;
-  name: string;
-  amount: number;
-  description: string;
-  is_percentage: boolean;
-}
+import { CustomFee } from "@/hooks/useCustomFees";
 
 interface FeesTableProps {
   fees: CustomFee[];

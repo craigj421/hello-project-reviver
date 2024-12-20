@@ -3,13 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useState } from "react";
-
-interface NewFee {
-  name: string;
-  amount: number;
-  description: string;
-  is_percentage: boolean;
-}
+import { NewFee } from "@/hooks/useCustomFees";
 
 interface NewFeeFormProps {
   onSubmit: (fee: NewFee) => void;
