@@ -1,6 +1,4 @@
-import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
 import { PropertyInformation } from "./calculator/PropertyInformation";
 import { CommissionDetails } from "./calculator/CommissionDetails";
 import { ClosingCosts } from "./calculator/ClosingCosts";
@@ -10,141 +8,18 @@ import { OtherCosts } from "./calculator/OtherCosts";
 import { CustomFeesSection } from "./calculator/CustomFeesSection";
 import { MortgageInformation } from "./calculator/MortgageInformation";
 import { PdfFieldsDialog } from "./calculator/PdfFieldsDialog";
-import { useCalculatorSettings } from "@/hooks/useCalculatorSettings";
-import { 
-  calculateCommission,
-  calculateTotalClosingCosts,
-  calculateNetProceeds
-} from "@/utils/netProceedsCalculations";
-import type { PropertyDetails } from "./calculator/types";
+import { CalculatorProvider, useCalculator } from "@/contexts/CalculatorContext";
 
-interface CustomFee {
-  id: string;
-  name: string;
-  amount: number;
-  is_percentage: boolean;
-}
-
-export const NetProceedsCalculator = () => {
-  const { toast } = useToast();
-  const { settings } = useCalculatorSettings();
-  const [customFees, setCustomFees] = useState<CustomFee[]>([]);
-  const [details, setDetails] = useState<PropertyDetails>({
-    sellerName: "",
-    propertyAddress: "",
-    purchasePrice: 0,
-    taxesApprox: 0,
-    docStampsDeed: 0,
-    ownersTitleInsurance: 0,
-    commissionRate: 6,
-    commission: 0,
-    complianceAudit: 0,
-    serviceTech: 0,
-    termiteInspection: 0,
-    fhaVaFees: 0,
-    survey: 0,
-    hoa: 0,
-    homeWarranty: 0,
-    buyersClosingCost: 0,
-    repairs: 0,
-    searchExamClosingFee: 0,
-    sellerPayingTitle: false,
-    firstMortgage: 0,
-    secondMortgage: 0,
-  });
-
-  const [dialogOpen, setDialogOpen] = useState(false);
-
-  useEffect(() => {
-    if (settings) {
-      // Update commission rate if it exists in settings
-      if (settings.commission) {
-        const commissionRate = parseFloat(settings.commission);
-        if (!isNaN(commissionRate)) {
-          setDetails(prev => ({
-            ...prev,
-            commissionRate: commissionRate
-          }));
-        }
-      }
-
-      // Update search/exam/closing fee if it exists in settings
-      if (settings.search_exam_closing_fee) {
-        const searchExamFee = parseFloat(settings.search_exam_closing_fee);
-        if (!isNaN(searchExamFee)) {
-          setDetails(prev => ({
-            ...prev,
-            searchExamClosingFee: searchExamFee
-          }));
-        }
-      }
-    }
-  }, [settings]);
-
-  useEffect(() => {
-    const fetchCustomFees = async () => {
-      const { data, error } = await supabase
-        .from('custom_fees')
-        .select('*')
-        .order('created_at', { ascending: true });
-
-      if (error) {
-        console.error('Error fetching custom fees:', error);
-        return;
-      }
-
-      console.log('Fetched custom fees:', data);
-      setCustomFees(data || []);
-    };
-
-    fetchCustomFees();
-  }, []);
-
-  useEffect(() => {
-    if (details.purchasePrice > 0) {
-      const calculatedCommission = calculateCommission(details.purchasePrice, details.commissionRate);
-      console.log("Updating commission amount:", calculatedCommission);
-      onInputChange("commission", calculatedCommission);
-    }
-  }, [details.purchasePrice, details.commissionRate]);
-
-  const calculateResults = () => {
-    const calculatedCommission = calculateCommission(details.purchasePrice, details.commissionRate);
-    const detailsWithCommission = { ...details, commission: calculatedCommission };
-    const totalClosingCosts = calculateTotalClosingCosts(
-      detailsWithCommission,
-      customFees,
-      details.purchasePrice
-    );
-    const netProceeds = calculateNetProceeds(
-      details.purchasePrice,
-      totalClosingCosts,
-      details.firstMortgage,
-      details.secondMortgage
-    );
-
-    toast({
-      title: "Calculation Complete",
-      description: `Estimated Net Proceeds: $${netProceeds.toLocaleString()}`,
-    });
-  };
-
-  const onInputChange = (field: keyof PropertyDetails, value: string | number | boolean) => {
-    setDetails(prev => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const handlePdfFieldsSubmit = (selectedFields: Array<keyof PropertyDetails>) => {
-    console.log("Selected fields for PDF:", selectedFields);
-    console.log("Details to include:", selectedFields.map(field => ({ [field]: details[field] })));
-    
-    toast({
-      title: "PDF Generation Started",
-      description: `Generating PDF with ${selectedFields.length} selected fields.`,
-    });
-  };
+const CalculatorContent = () => {
+  const { 
+    details, 
+    customFees, 
+    onInputChange, 
+    calculateResults, 
+    dialogOpen, 
+    setDialogOpen,
+    handlePdfFieldsSubmit 
+  } = useCalculator();
 
   return (
     <div className="space-y-6">
@@ -176,5 +51,13 @@ export const NetProceedsCalculator = () => {
         customFees={customFees}
       />
     </div>
+  );
+};
+
+export const NetProceedsCalculator = () => {
+  return (
+    <CalculatorProvider>
+      <CalculatorContent />
+    </CalculatorProvider>
   );
 };

@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { PropertyDetails } from "./types";
 import { calculateTitleInsuranceAmount } from "@/utils/calculations/titleInsurance";
@@ -8,6 +7,7 @@ import { TitleInsuranceInput } from "./closing-costs/TitleInsuranceInput";
 import { SearchExamInput } from "./closing-costs/SearchExamInput";
 import { SellerTitleSwitch } from "./closing-costs/SellerTitleSwitch";
 import { useCalculatorSettings } from "@/hooks/useCalculatorSettings";
+import { useEffect } from "react";
 
 interface ClosingCostsProps {
   details: PropertyDetails;
