@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { PropertyInformation } from "./calculator/PropertyInformation";
 import { CommissionDetails } from "./calculator/CommissionDetails";
 import { ClosingCosts } from "./calculator/ClosingCosts";
@@ -11,13 +10,13 @@ import { OtherCosts } from "./calculator/OtherCosts";
 import { CustomFeesSection } from "./calculator/CustomFeesSection";
 import { MortgageInformation } from "./calculator/MortgageInformation";
 import { PdfFieldsDialog } from "./calculator/PdfFieldsDialog";
+import { useCalculatorSettings } from "@/hooks/useCalculatorSettings";
 import { 
   calculateCommission,
   calculateTotalClosingCosts,
   calculateNetProceeds
 } from "@/utils/netProceedsCalculations";
 import type { PropertyDetails } from "./calculator/types";
-import { useAuth } from "@/contexts/AuthContext";
 
 interface CustomFee {
   id: string;
@@ -27,8 +26,8 @@ interface CustomFee {
 }
 
 export const NetProceedsCalculator = () => {
-  const { user } = useAuth();
   const { toast } = useToast();
+  const { settings } = useCalculatorSettings();
   const [customFees, setCustomFees] = useState<CustomFee[]>([]);
   const [details, setDetails] = useState<PropertyDetails>({
     sellerName: "",
@@ -57,52 +56,32 @@ export const NetProceedsCalculator = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
-    const fetchSettings = async () => {
-      if (!user) return;
-
-      const { data: settingsData, error: settingsError } = await supabase
-        .from('settings')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-
-      if (settingsError) {
-        console.error('Error fetching settings:', settingsError);
-        return;
+    if (settings) {
+      // Update commission rate if it exists in settings
+      if (settings.commission) {
+        const commissionRate = parseFloat(settings.commission);
+        if (!isNaN(commissionRate)) {
+          setDetails(prev => ({
+            ...prev,
+            commissionRate: commissionRate
+          }));
+        }
       }
 
-      if (settingsData) {
-        console.log('Fetched settings:', settingsData);
-        // Update commission rate if it exists in settings
-        if (settingsData.commission) {
-          const commissionRate = parseFloat(settingsData.commission);
-          if (!isNaN(commissionRate)) {
-            setDetails(prev => ({
-              ...prev,
-              commissionRate: commissionRate
-            }));
-          }
+      // Update search/exam/closing fee if it exists in settings
+      if (settings.search_exam_closing_fee) {
+        const searchExamFee = parseFloat(settings.search_exam_closing_fee);
+        if (!isNaN(searchExamFee)) {
+          setDetails(prev => ({
+            ...prev,
+            searchExamClosingFee: searchExamFee
+          }));
         }
-
-        // Update search/exam/closing fee if it exists in settings
-        if (settingsData.search_exam_closing_fee) {
-          const searchExamFee = parseFloat(settingsData.search_exam_closing_fee);
-          if (!isNaN(searchExamFee)) {
-            setDetails(prev => ({
-              ...prev,
-              searchExamClosingFee: searchExamFee
-            }));
-          }
-        }
-
-        // Store settings in localStorage for title insurance calculations
-        localStorage.setItem('agent_settings', JSON.stringify({
-          titleInsuranceRates: settingsData.title_insurance_rates || [],
-          state: 'Florida'
-        }));
       }
-    };
+    }
+  }, [settings]);
 
+  useEffect(() => {
     const fetchCustomFees = async () => {
       const { data, error } = await supabase
         .from('custom_fees')
@@ -118,9 +97,8 @@ export const NetProceedsCalculator = () => {
       setCustomFees(data || []);
     };
 
-    fetchSettings();
     fetchCustomFees();
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     if (details.purchasePrice > 0) {

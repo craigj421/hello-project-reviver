@@ -1,12 +1,13 @@
 import { useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { PropertyDetails } from "./types";
-import { calculateTitleInsurance } from "@/utils/titleInsurance";
+import { calculateTitleInsuranceAmount } from "@/utils/calculations/titleInsurance";
 import { TaxesInput } from "./closing-costs/TaxesInput";
 import { DocStampsInput } from "./closing-costs/DocStampsInput";
 import { TitleInsuranceInput } from "./closing-costs/TitleInsuranceInput";
 import { SearchExamInput } from "./closing-costs/SearchExamInput";
 import { SellerTitleSwitch } from "./closing-costs/SellerTitleSwitch";
+import { useCalculatorSettings } from "@/hooks/useCalculatorSettings";
 
 interface ClosingCostsProps {
   details: PropertyDetails;
@@ -14,28 +15,15 @@ interface ClosingCostsProps {
 }
 
 export const ClosingCosts = ({ details, onInputChange }: ClosingCostsProps) => {
+  const { titleRates } = useCalculatorSettings();
+
   useEffect(() => {
-    if (details.purchasePrice > 0) {
-      const savedSettings = localStorage.getItem('agent_settings');
-      const settings = savedSettings ? JSON.parse(savedSettings) : { state: 'Florida' };
-      
-      console.log("Calculating title insurance for state:", settings.state);
-      const titleInsurance = calculateTitleInsurance(details.purchasePrice, settings.state);
+    if (details.purchasePrice > 0 && titleRates.length > 0) {
+      const titleInsurance = calculateTitleInsuranceAmount(details.purchasePrice, titleRates);
       console.log("Updating title insurance amount:", titleInsurance);
       onInputChange("ownersTitleInsurance", titleInsurance);
     }
-  }, [details.purchasePrice, onInputChange]);
-
-  useEffect(() => {
-    const savedSettings = localStorage.getItem('agent_settings');
-    if (savedSettings) {
-      const settings = JSON.parse(savedSettings);
-      if (settings.searchExamClosingFee) {
-        console.log("Setting default Search/Exam/Closing Fee:", settings.searchExamClosingFee);
-        onInputChange("searchExamClosingFee", parseFloat(settings.searchExamClosingFee));
-      }
-    }
-  }, [onInputChange]);
+  }, [details.purchasePrice, titleRates, onInputChange]);
 
   return (
     <Card className="p-4">
