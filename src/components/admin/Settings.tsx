@@ -1,5 +1,4 @@
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { AgentInfoSection } from "./settings/AgentInfoSection";
 import { LogoSection } from "./settings/LogoSection";
@@ -7,9 +6,10 @@ import { ToggleSection } from "./settings/ToggleSection";
 import { TaxSection } from "./settings/TaxSection";
 import { TitleInsuranceSection } from "./settings/TitleInsuranceSection";
 import { CustomFeesSection } from "./settings/CustomFeesSection";
+import { SaveButton } from "./settings/SaveButton";
+import { SignOutButton } from "./settings/SignOutButton";
 import { useSettings } from "@/hooks/useSettings";
 import { useAuth } from "@/contexts/AuthContext";
-import { LogOut } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const Settings = () => {
@@ -87,20 +87,8 @@ export const Settings = () => {
           onToggle={(key) => updateSettings({ [key]: !settings[key as keyof typeof settings] })}
         />
 
-        <Button onClick={handleSave} className="w-full">
-          Save Settings
-        </Button>
-
-        <div className="border-t pt-4">
-          <Button 
-            variant="destructive" 
-            className="w-full" 
-            onClick={signOut}
-          >
-            <LogOut className="mr-2" />
-            Sign Out
-          </Button>
-        </div>
+        <SaveButton onSave={handleSave} />
+        <SignOutButton onSignOut={signOut} />
       </div>
     </Card>
   );
