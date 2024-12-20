@@ -3,8 +3,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { FeesTable } from "./custom-fees/FeesTable";
-import { NewFeeForm } from "./custom-fees/NewFeeForm";
+import { CustomFeesContent } from "./custom-fees/CustomFeesContent";
 
 interface CustomFee {
   id: string;
@@ -106,8 +105,11 @@ export const CustomFeesSection = () => {
   return (
     <div className="space-y-4">
       <Label>Custom Fees</Label>
-      <FeesTable fees={fees} onDelete={deleteFee} />
-      <NewFeeForm onSubmit={addFee} />
+      <CustomFeesContent 
+        fees={fees}
+        onDelete={deleteFee}
+        onAdd={addFee}
+      />
     </div>
   );
 };

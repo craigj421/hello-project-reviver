@@ -1,16 +1,9 @@
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { AgentInfoSection } from "./settings/AgentInfoSection";
-import { LogoSection } from "./settings/LogoSection";
-import { ToggleSection } from "./settings/ToggleSection";
-import { TaxSection } from "./settings/TaxSection";
-import { TitleInsuranceSection } from "./settings/TitleInsuranceSection";
-import { CustomFeesSection } from "./settings/CustomFeesSection";
-import { SaveButton } from "./settings/SaveButton";
-import { SignOutButton } from "./settings/SignOutButton";
 import { useSettings } from "@/hooks/useSettings";
 import { useAuth } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SettingsContent } from "./settings/SettingsContent";
 
 export const Settings = () => {
   const { toast } = useToast();
@@ -57,39 +50,14 @@ export const Settings = () => {
   return (
     <Card className="p-6">
       <h2 className="text-xl font-semibold mb-4">Settings</h2>
-      <div className="space-y-6">
-        <AgentInfoSection 
-          agentName={settings.agentName}
-          commission={settings.commission}
-          onSettingChange={(key: string, value: any) => updateSettings({ [key]: value })}
-        />
-
-        <TitleInsuranceSection
-          rates={settings.titleInsuranceRates}
-          onRatesChange={(rates) => updateSettings({ titleInsuranceRates: rates })}
-        />
-
-        <TaxSection
-          propertyTaxRate={settings.propertyTaxRate}
-          searchExamClosingFee={settings.searchExamClosingFee}
-          onSettingChange={(key: string, value: any) => updateSettings({ [key]: value })}
-        />
-
-        <CustomFeesSection />
-
-        <LogoSection 
-          logoPreview={settings.logo_url || logoPreview}
-          onLogoChange={handleLogoChange}
-        />
-
-        <ToggleSection 
-          settings={settings}
-          onToggle={(key) => updateSettings({ [key]: !settings[key as keyof typeof settings] })}
-        />
-
-        <SaveButton onSave={handleSave} />
-        <SignOutButton onSignOut={signOut} />
-      </div>
+      <SettingsContent 
+        settings={settings}
+        updateSettings={updateSettings}
+        handleLogoChange={handleLogoChange}
+        logoPreview={logoPreview}
+        onSave={handleSave}
+        onSignOut={signOut}
+      />
     </Card>
   );
 };
