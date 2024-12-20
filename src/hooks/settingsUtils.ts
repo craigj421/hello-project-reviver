@@ -54,7 +54,8 @@ export const fetchUserSettings = async (userId: string | undefined) => {
 export const updateUserSettings = async (userId: string, settings: Settings) => {
   console.log("Updating settings for user:", userId, "with data:", settings);
   
-  const { error } = await supabase
+  // First, update the main settings
+  const { data: updatedSettings, error: settingsError } = await supabase
     .from('settings')
     .upsert({
       user_id: userId,
@@ -67,11 +68,45 @@ export const updateUserSettings = async (userId: string, settings: Settings) => 
       property_tax_rate: settings.propertyTaxRate,
       search_exam_closing_fee: settings.searchExamClosingFee,
     })
-    .eq('user_id', userId);
+    .select()
+    .single();
 
-  if (error) {
-    console.error("Error updating settings:", error);
-    throw error;
+  if (settingsError) {
+    console.error("Error updating settings:", settingsError);
+    throw settingsError;
+  }
+
+  // Then, handle title insurance rates
+  if (settings.titleInsuranceRates && settings.titleInsuranceRates.length > 0) {
+    console.log("Updating title insurance rates:", settings.titleInsuranceRates);
+    
+    // Delete existing rates for this settings entry
+    const { error: deleteError } = await supabase
+      .from('title_insurance_rates')
+      .delete()
+      .eq('settings_id', updatedSettings.id);
+
+    if (deleteError) {
+      console.error("Error deleting existing rates:", deleteError);
+      throw deleteError;
+    }
+
+    // Insert new rates
+    const ratesToInsert = settings.titleInsuranceRates.map(rate => ({
+      settings_id: updatedSettings.id,
+      min_amount: rate.minAmount,
+      max_amount: rate.maxAmount,
+      rate_per_thousand: rate.ratePerThousand
+    }));
+
+    const { error: insertError } = await supabase
+      .from('title_insurance_rates')
+      .insert(ratesToInsert);
+
+    if (insertError) {
+      console.error("Error inserting title insurance rates:", insertError);
+      throw insertError;
+    }
   }
   
   console.log("Settings updated successfully in database");

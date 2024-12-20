@@ -26,12 +26,14 @@ export const TitleInsuranceSection = ({ rates, onRatesChange }: TitleInsuranceSe
 
   const addRate = () => {
     if (newRate.minAmount >= 0 && newRate.maxAmount > newRate.minAmount && newRate.ratePerThousand > 0) {
+      console.log("Adding new rate:", newRate);
       onRatesChange([...rates, newRate]);
       setNewRate({ minAmount: 0, maxAmount: 0, ratePerThousand: 0 });
     }
   };
 
   const deleteRate = (index: number) => {
+    console.log("Deleting rate at index:", index);
     const updatedRates = rates.filter((_, i) => i !== index);
     onRatesChange(updatedRates);
   };
