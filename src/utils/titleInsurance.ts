@@ -1,25 +1,35 @@
+import { supabase } from "@/integrations/supabase/client";
+
 export interface TitleRate {
   minAmount: number;
   maxAmount: number;
   ratePerThousand: number;
 }
 
-export const calculateTitleInsurance = (purchasePrice: number, state: string = 'FL'): number => {
+export const calculateTitleInsurance = async (purchasePrice: number, state: string = 'FL'): Promise<number> => {
   console.log(`Calculating title insurance for ${state} with purchase price: ${purchasePrice}`);
   
-  const savedSettings = localStorage.getItem('agent_settings');
-  if (!savedSettings) {
-    console.warn('No settings found in localStorage');
+  // Get the current user's settings
+  const { data: settingsData, error: settingsError } = await supabase
+    .from('settings')
+    .select('*, title_insurance_rates(*)')
+    .single();
+
+  if (settingsError) {
+    console.error('Error fetching title insurance rates:', settingsError);
     return 0;
   }
 
-  const settings = JSON.parse(savedSettings);
-  const rates = settings.titleInsuranceRates;
-
-  if (!rates || rates.length === 0) {
+  if (!settingsData?.title_insurance_rates || settingsData.title_insurance_rates.length === 0) {
     console.warn('No title insurance rates found in settings');
     return 0;
   }
+
+  const rates = settingsData.title_insurance_rates.map(rate => ({
+    minAmount: rate.min_amount,
+    maxAmount: rate.max_amount,
+    ratePerThousand: rate.rate_per_thousand
+  }));
 
   console.log('Using title insurance rates:', rates);
   

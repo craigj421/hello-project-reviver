@@ -17,6 +17,7 @@ import {
   calculateNetProceeds
 } from "@/utils/netProceedsCalculations";
 import type { PropertyDetails } from "./calculator/types";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface CustomFee {
   id: string;
@@ -26,6 +27,7 @@ interface CustomFee {
 }
 
 export const NetProceedsCalculator = () => {
+  const { user } = useAuth();
   const { toast } = useToast();
   const [customFees, setCustomFees] = useState<CustomFee[]>([]);
   const [details, setDetails] = useState<PropertyDetails>({
@@ -55,6 +57,52 @@ export const NetProceedsCalculator = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
+    const fetchSettings = async () => {
+      if (!user) return;
+
+      const { data: settingsData, error: settingsError } = await supabase
+        .from('settings')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (settingsError) {
+        console.error('Error fetching settings:', settingsError);
+        return;
+      }
+
+      if (settingsData) {
+        console.log('Fetched settings:', settingsData);
+        // Update commission rate if it exists in settings
+        if (settingsData.commission) {
+          const commissionRate = parseFloat(settingsData.commission);
+          if (!isNaN(commissionRate)) {
+            setDetails(prev => ({
+              ...prev,
+              commissionRate: commissionRate
+            }));
+          }
+        }
+
+        // Update search/exam/closing fee if it exists in settings
+        if (settingsData.search_exam_closing_fee) {
+          const searchExamFee = parseFloat(settingsData.search_exam_closing_fee);
+          if (!isNaN(searchExamFee)) {
+            setDetails(prev => ({
+              ...prev,
+              searchExamClosingFee: searchExamFee
+            }));
+          }
+        }
+
+        // Store settings in localStorage for title insurance calculations
+        localStorage.setItem('agent_settings', JSON.stringify({
+          titleInsuranceRates: settingsData.title_insurance_rates || [],
+          state: 'Florida'
+        }));
+      }
+    };
+
     const fetchCustomFees = async () => {
       const { data, error } = await supabase
         .from('custom_fees')
@@ -70,8 +118,17 @@ export const NetProceedsCalculator = () => {
       setCustomFees(data || []);
     };
 
+    fetchSettings();
     fetchCustomFees();
-  }, []);
+  }, [user]);
+
+  useEffect(() => {
+    if (details.purchasePrice > 0) {
+      const calculatedCommission = calculateCommission(details.purchasePrice, details.commissionRate);
+      console.log("Updating commission amount:", calculatedCommission);
+      onInputChange("commission", calculatedCommission);
+    }
+  }, [details.purchasePrice, details.commissionRate]);
 
   const calculateResults = () => {
     const calculatedCommission = calculateCommission(details.purchasePrice, details.commissionRate);
@@ -94,7 +151,7 @@ export const NetProceedsCalculator = () => {
     });
   };
 
-  const handleInputChange = (field: keyof PropertyDetails, value: string | number | boolean) => {
+  const onInputChange = (field: keyof PropertyDetails, value: string | number | boolean) => {
     setDetails(prev => ({
       ...prev,
       [field]: value,
@@ -114,14 +171,14 @@ export const NetProceedsCalculator = () => {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <PropertyInformation details={details} onInputChange={handleInputChange} />
-        <CommissionDetails details={details} onInputChange={handleInputChange} />
-        <ClosingCosts details={details} onInputChange={handleInputChange} />
-        <AdditionalFees details={details} onInputChange={handleInputChange} />
-        <AdditionalServices details={details} onInputChange={handleInputChange} />
+        <PropertyInformation details={details} onInputChange={onInputChange} />
+        <CommissionDetails details={details} onInputChange={onInputChange} />
+        <ClosingCosts details={details} onInputChange={onInputChange} />
+        <AdditionalFees details={details} onInputChange={onInputChange} />
+        <AdditionalServices details={details} onInputChange={onInputChange} />
         <CustomFeesSection details={details} customFees={customFees} />
-        <OtherCosts details={details} onInputChange={handleInputChange} />
-        <MortgageInformation details={details} onInputChange={handleInputChange} />
+        <OtherCosts details={details} onInputChange={onInputChange} />
+        <MortgageInformation details={details} onInputChange={onInputChange} />
       </div>
 
       <div className="flex justify-end gap-4 mt-6">
