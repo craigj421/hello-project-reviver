@@ -2,6 +2,7 @@ import { UserManagement } from "@/components/admin/UserManagement";
 import { Settings } from "@/components/admin/Settings";
 import { Navigation } from "@/components/admin/Navigation";
 import { DocumentTemplatesManagement } from "@/components/admin/DocumentTemplatesManagement";
+import { DocStampsManagement } from "@/components/admin/DocStampsManagement";
 
 const Admin = () => {
   return (
@@ -12,6 +13,7 @@ const Admin = () => {
         <UserManagement />
         <Settings />
         <DocumentTemplatesManagement />
+        <DocStampsManagement />
       </div>
     </div>
   );

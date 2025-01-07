@@ -50,6 +50,217 @@ export type Database = {
           },
         ]
       }
+      doc_stamp_cities: {
+        Row: {
+          created_at: string
+          has_special_rules: boolean | null
+          id: string
+          name: string
+          special_rules: Json | null
+          state_id: string
+          surtax_rate: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          has_special_rules?: boolean | null
+          id?: string
+          name: string
+          special_rules?: Json | null
+          state_id: string
+          surtax_rate?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          has_special_rules?: boolean | null
+          id?: string
+          name?: string
+          special_rules?: Json | null
+          state_id?: string
+          surtax_rate?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doc_stamp_cities_state_id_fkey"
+            columns: ["state_id"]
+            isOneToOne: false
+            referencedRelation: "doc_stamp_states"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "doc_stamp_cities_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      doc_stamp_examples: {
+        Row: {
+          amount: number
+          calculation_details: string
+          city_id: string | null
+          created_at: string
+          exemption_id: string | null
+          id: string
+          result: number
+          scenario: string
+          state_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          calculation_details: string
+          city_id?: string | null
+          created_at?: string
+          exemption_id?: string | null
+          id?: string
+          result: number
+          scenario: string
+          state_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          calculation_details?: string
+          city_id?: string | null
+          created_at?: string
+          exemption_id?: string | null
+          id?: string
+          result?: number
+          scenario?: string
+          state_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doc_stamp_examples_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "doc_stamp_cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "doc_stamp_examples_exemption_id_fkey"
+            columns: ["exemption_id"]
+            isOneToOne: false
+            referencedRelation: "doc_stamp_exemptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "doc_stamp_examples_state_id_fkey"
+            columns: ["state_id"]
+            isOneToOne: false
+            referencedRelation: "doc_stamp_states"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "doc_stamp_examples_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      doc_stamp_exemptions: {
+        Row: {
+          conditions: Json | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          state_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          conditions?: Json | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          state_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          conditions?: Json | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          state_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doc_stamp_exemptions_state_id_fkey"
+            columns: ["state_id"]
+            isOneToOne: false
+            referencedRelation: "doc_stamp_states"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "doc_stamp_exemptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      doc_stamp_states: {
+        Row: {
+          base_rate: number
+          calculation_method: string
+          created_at: string
+          id: string
+          minimum_fee: number
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          base_rate: number
+          calculation_method?: string
+          created_at?: string
+          id?: string
+          minimum_fee?: number
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          base_rate?: number
+          calculation_method?: string
+          created_at?: string
+          id?: string
+          minimum_fee?: number
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doc_stamp_states_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_templates: {
         Row: {
           created_at: string
@@ -220,7 +431,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      initialize_florida_data: {
+        Args: {
+          user_id_param: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
