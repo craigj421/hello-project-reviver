@@ -1,17 +1,10 @@
 import * as React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { supabase } from "@/integrations/supabase/client";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import type { PropertyDetails } from "./types";
-import { PdfPreview } from "./PdfPreview";
+import { DialogHeader } from "./pdf-dialog/DialogHeader";
 import { SectionSelector } from "./pdf-dialog/SectionSelector";
-import { PdfActions } from "./pdf-dialog/PdfActions";
+import { PreviewContent } from "./pdf-dialog/PreviewContent";
+import { DialogFooter } from "./pdf-dialog/DialogFooter";
 
 interface CustomFee {
   id: string;
@@ -86,9 +79,7 @@ export const PdfFieldsDialog = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[900px] h-[90vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle>PDF Preview</DialogTitle>
-        </DialogHeader>
+        <DialogHeader />
         <div className="grid grid-cols-2 gap-4 p-4 flex-1 min-h-0">
           <div className="space-y-4 overflow-y-auto">
             <SectionSelector 
@@ -96,22 +87,17 @@ export const PdfFieldsDialog = ({
               onSectionChange={handleSectionChange}
             />
           </div>
-          <ScrollArea className="flex-1 border rounded-md">
-            <div className="p-4" ref={pdfRef}>
-              <PdfPreview 
-                details={details} 
-                selectedSections={selectedSections}
-                customFees={customFees}
-              />
-            </div>
-          </ScrollArea>
-        </div>
-        <DialogFooter className="mt-4">
-          <PdfActions 
+          <PreviewContent 
+            details={details}
+            selectedSections={selectedSections}
+            customFees={customFees}
             pdfRef={pdfRef}
-            onComplete={() => onSubmit(getSelectedFields())}
           />
-        </DialogFooter>
+        </div>
+        <DialogFooter 
+          pdfRef={pdfRef}
+          onComplete={() => onSubmit(getSelectedFields())}
+        />
       </DialogContent>
     </Dialog>
   );
