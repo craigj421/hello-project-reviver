@@ -5,7 +5,6 @@ import { TaxesInput } from "./closing-costs/TaxesInput";
 import { DocStampsInput } from "./closing-costs/DocStampsInput";
 import { TitleInsuranceInput } from "./closing-costs/TitleInsuranceInput";
 import { SearchExamInput } from "./closing-costs/SearchExamInput";
-import { SellerTitleSwitch } from "./closing-costs/SellerTitleSwitch";
 import { useCalculatorSettings } from "@/hooks/useCalculatorSettings";
 import { useEffect } from "react";
 
@@ -31,9 +30,8 @@ export const ClosingCosts = ({ details, onInputChange }: ClosingCostsProps) => {
       <div className="space-y-4">
         <TaxesInput details={details} onInputChange={onInputChange} />
         <DocStampsInput details={details} onInputChange={onInputChange} />
-        <TitleInsuranceInput details={details} />
+        <TitleInsuranceInput details={details} onInputChange={onInputChange} />
         <SearchExamInput details={details} onInputChange={onInputChange} />
-        <SellerTitleSwitch details={details} onInputChange={onInputChange} />
       </div>
     </Card>
   );
