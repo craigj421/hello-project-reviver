@@ -5,10 +5,15 @@ import { PropertyDetails } from "../types";
 
 interface TitleInsuranceInputProps {
   details: PropertyDetails;
-  onInputChange: (field: keyof PropertyDetails, value: boolean) => void;
+  onInputChange: (field: keyof PropertyDetails, value: string | number | boolean) => void;
 }
 
 export const TitleInsuranceInput = ({ details, onInputChange }: TitleInsuranceInputProps) => {
+  console.log("Title Insurance Component State:", {
+    titleInsuranceAmount: details.ownersTitleInsurance,
+    sellerPaying: details.sellerPayingTitle
+  });
+
   return (
     <div className="space-y-2">
       <div>
@@ -26,9 +31,12 @@ export const TitleInsuranceInput = ({ details, onInputChange }: TitleInsuranceIn
         <Switch
           id="sellerPayingTitle"
           checked={details.sellerPayingTitle}
-          onCheckedChange={(checked) => onInputChange("sellerPayingTitle", checked)}
+          onCheckedChange={(checked) => {
+            console.log("Seller paying title toggle changed:", checked);
+            onInputChange("sellerPayingTitle", checked);
+          }}
         />
-        <Label htmlFor="sellerPayingTitle">Is Seller Paying Title?</Label>
+        <Label htmlFor="sellerPayingTitle">Is Seller Paying Title Insurance?</Label>
       </div>
     </div>
   );

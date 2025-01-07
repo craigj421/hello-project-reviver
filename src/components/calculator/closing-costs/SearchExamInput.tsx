@@ -8,6 +8,10 @@ interface SearchExamInputProps {
 }
 
 export const SearchExamInput = ({ details, onInputChange }: SearchExamInputProps) => {
+  console.log("Search/Exam Fee Component State:", {
+    searchExamFee: details.searchExamClosingFee
+  });
+
   return (
     <div>
       <Label htmlFor="searchExamClosingFee">Search/Exam/Closing Fee</Label>
