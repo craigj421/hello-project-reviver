@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -5,11 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { AuthProvider } from "./contexts/AuthContext";
-import { ProtectedRoute } from "./components/ProtectedRoute";
 import Index from "./pages/Index";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import ResetPassword from "./pages/ResetPassword";
 import Pricing from "./pages/Pricing";
 import { TemplateEditor } from "./components/admin/templates/TemplateEditor";
 
@@ -24,36 +21,22 @@ const App = () => (
           <Toaster />
           <Sonner />
           <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/pricing" element={<Pricing />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Index />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/" element={<Index />} />
             <Route
               path="/admin"
               element={
-                <ProtectedRoute>
-                  <Suspense fallback={<div>Loading...</div>}>
-                    <Admin />
-                  </Suspense>
-                </ProtectedRoute>
+                <Suspense fallback={<div>Loading...</div>}>
+                  <Admin />
+                </Suspense>
               }
             />
             <Route
               path="/admin/templates/:id"
-              element={
-                <ProtectedRoute>
-                  <TemplateEditor />
-                </ProtectedRoute>
-              }
+              element={<TemplateEditor />}
             />
+            {/* Redirect any other routes to home */}
+            <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </AuthProvider>
       </BrowserRouter>
